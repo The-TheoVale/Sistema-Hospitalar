@@ -18,6 +18,8 @@ public class ListaEspera {
     public void entrarNaFila (Paciente paciente){
         fila.add(paciente);
     }
+
+    
     public Paciente promoverProximo (){
         return fila.poll();
     }
@@ -33,6 +35,8 @@ public class ListaEspera {
         return data;
     }
 
-    
+    public Queue<Paciente> getFila() {
+        return fila;
+    }
     
 }

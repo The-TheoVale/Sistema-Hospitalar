@@ -1,0 +1,10 @@
+id;nome;senha;especialidade;valorConsultaParticular;planosAtendidos
+CassioB;Cássio Borge;4321;Pediatra;150.0;Hapvida
+JoaoS;João Silva;12;Cardiologista;200.0;Unimed
+MariaO;Maria Oliveira;123;Pediatra;180.0;Hapvida
+CarlosS;Carlos Souza;1234;Clínico Geral;110.0;Unimed,Hapvida
+AnaP;Ana Pereira;12345;Cardiologista;180.0;Amil
+PedroC;Pedro Costa;123456;Pediatra;220.0;Amil,Unimed,Hapvida
+FernandaL;Fernanda Lima;1234567;Cardiologista;150.0;Unimed
+RicardoA;Ricardo Alves;RickA;Clínico Geral;140.0;Unimed, Hapvida, Amil
+MarceloF;Marcelo Fernandes;Marc;Cardiologista;300.0;Hapvida,Amil

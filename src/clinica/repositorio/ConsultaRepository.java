@@ -108,4 +108,37 @@ public class ConsultaRepository {
         }
         return busca;
     }
+
+    public List<Consulta> buscarAgendadas (String idPaciente){
+        List<Consulta> busca = new ArrayList<>();
+
+        for (Consulta c : consultas){
+            if (c.getPaciente().getId().equals(idPaciente) && c.getStatus().equals(StatusConsulta.AGENDADA)){
+                busca.add(c);
+            } 
+        }
+        return busca;
+    }
+
+    public List<Consulta> buscarAgendadasPorMedico (String idMedico){
+        List<Consulta> busca = new ArrayList<>();
+
+        for (Consulta c : consultas){
+            if (c.getMedico().getId().equals(idMedico) && c.getStatus().equals(StatusConsulta.AGENDADA)){
+                busca.add(c);
+            } 
+        }
+        return busca;
+    }
+
+    public boolean disponibilidadeDoMedico (String idMedico, LocalDate data){
+        int contador = 0;
+        
+        for (Consulta c : consultas){
+            if (!c.getStatus().equals(StatusConsulta.CANCELADA) && c.getMedico().getId().equals(idMedico) && c.getData().equals(data)) contador++;
+        }
+        
+        Medico medico = medicosRepositorio.buscarPorId(idMedico);
+        return contador < medico.maxConsultasDia();
+    }
 }

@@ -49,4 +49,14 @@ public abstract class Medico extends Usuario{
     public double getValorConsulta() {
         return valorConsultaParticular;
     }
+
+    public void setSenha(String senha) { this.senha = senha; }
+
+    public void setEspecialidade(String especialidade) { this.especialidade = especialidade;}
+
+    public void setValorConsultaParticular(double valorConsultaParticular) { this.valorConsultaParticular = valorConsultaParticular; }
+    
+    public void setPlanosAtendidos(List<String> planosAtendidos) {
+        this.planosAtendidos = planosAtendidos;
+    }
 }

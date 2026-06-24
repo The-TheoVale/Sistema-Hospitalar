@@ -35,5 +35,11 @@ public class Paciente extends Usuario{
         return !"não tenho".equals(this.planoSaude);
     }
 
+    public void setIdade(int idade) { this.idade = idade; }
+
+    public void setPlano(String planoSaude) { this.planoSaude = planoSaude; }
+    
+
+
     
 }

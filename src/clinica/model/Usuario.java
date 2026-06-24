@@ -28,12 +28,8 @@ public abstract class Usuario {
     }
 
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public void alterarSenha (String senhaAntiga, String novaSenha){
-        if (!this.senha.equals(senhaAntiga)) return;
-        this.senha = novaSenha;
-    }
+    public void setSenha(String senha) { this.senha = senha; }
+
 }

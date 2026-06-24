@@ -29,7 +29,7 @@ public class Consulta {
         } else {
             this.valorPago = medico.getValorConsulta();
         }
-
+        
         this.status = StatusConsulta.REALIZADA;
     }
 

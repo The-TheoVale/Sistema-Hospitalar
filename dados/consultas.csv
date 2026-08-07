@@ -1,9 +1,146 @@
 idMedico;idPaciente;data;status;descricao;receita;exames;valorPago
-JoaoS;jsfael;2026-06-23;REALIZADA;bala;bosta;cu;0.0
-JoaoS;bape;2026-06-23;REALIZADA;bala anus;banana;macaao;0.0
-JoaoS;Ant;2026-06-23;REALIZADA;anto;nio;frota;350.0
-CassioB;Ant;2026-06-23;REALIZADA;castlor;borges;o cara;180.0
-MariaO;Ant;2026-06-23;REALIZADA;conta;conta;pay the bills;180.0
-AnaP;Theo;2026-06-23;REALIZADA;contas;contas;contas;330.0
-CassioB;Theo;2026-06-23;REALIZADA;cassio b;cassio o b;borges;180.0
-CarlosS;Theo;2026-06-23;AGENDADA;;;;-1.0
+AlineB;vanpersie;2026-06-11;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;0.0
+CatarinaD;totti;2026-06-11;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;165.0
+DéboraF;beckenbauer;2026-06-11;REALIZADA;Paciente com palpitações e cansaço aos esforços;Beta-bloqueador em dose baixa;Eletrocardiograma;275.0
+FernandaS;cr7;2026-06-11;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;0.0
+GustavoP;buffon;2026-06-11;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;0.0
+HenriqueS;henry;2026-06-11;REALIZADA;Atualização do calendário vacinal;Sem prescrição medicamentosa;Sem exames solicitados;185.0
+IsabelaR;pirlo;2026-06-11;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;195.0
+JulianaC;alexis;2026-06-11;REALIZADA;Avaliação pré-operatória cardiológica;Sem alteração na medicação atual;Ecocardiograma;0.0
+MarianaL;buffon;2026-06-11;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;210.0
+MarianaL;raul;2026-06-11;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;210.0
+TatianeS;iniesta;2026-06-11;REALIZADA;Hipertensão arterial leve detectada;Losartana 50mg, 1x ao dia;Perfil lipídico;0.0
+AlexandreC;kaka;2026-06-12;REALIZADA;Dor de garganta e febre baixa;Amoxicilina 500mg, 8/8h;Cultura de orofaringe;0.0
+AlineB;rivaldo;2026-06-12;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;205.0
+EduardoL;rooney;2026-06-12;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;0.0
+EduardoL;cafu;2026-06-12;REALIZADA;Avaliação pré-operatória cardiológica;Sem alteração na medicação atual;Ecocardiograma;0.0
+JulianaC;buffon;2026-06-12;REALIZADA;Colesterol elevado com risco cardiovascular;Estatina 20mg à noite;Perfil lipídico completo;0.0
+LarissaD;terry;2026-06-12;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;230.0
+MarcosT;raul;2026-06-12;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;0.0
+MelissaC;cr7;2026-06-12;REALIZADA;Atualização do calendário vacinal;Sem prescrição medicamentosa;Sem exames solicitados;0.0
+PatriciaS;eto;2026-06-12;REALIZADA;Check-up de rotina, sem queixas relevantes;Suplementação de vitamina D;Glicemia em jejum;110.0
+PatríciaM;maldini;2026-06-12;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;0.0
+PaulaF;pirlo;2026-06-12;REALIZADA;Falta de ar progressiva aos esforços;Diurético em baixa dose;Eletrocardiograma e raio-X de tórax;0.0
+RenataC;buffon;2026-06-12;REALIZADA;Quadro de gastrite, dor epigástrica;Omeprazol 20mg em jejum;Endoscopia digestiva;150.0
+RicardoF;alexis;2026-06-12;REALIZADA;Paciente com palpitações e cansaço aos esforços;Beta-bloqueador em dose baixa;Eletrocardiograma;270.0
+ThiagoA;ronaldinho;2026-06-12;REALIZADA;Sintomas de alergia respiratória sazonal;Loratadina 10mg ao dia;Sem exames solicitados;0.0
+AlineB;haaland;2026-06-13;REALIZADA;Erupção cutânea leve, suspeita de alergia;Pomada anti-histamínica tópica;Sem exames solicitados;205.0
+AlineB;pirlo;2026-06-13;REALIZADA;Criança com febre e irritabilidade;Paracetamol pediátrico conforme peso;Hemograma completo;0.0
+BeatrizN;bergkamp;2026-06-13;REALIZADA;Dor abdominal recorrente em criança;Antiespasmódico pediátrico;Ultrassom abdominal;200.0
+CamilaP;cafu;2026-06-13;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;0.0
+DéboraF;vanpersie;2026-06-13;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;0.0
+FernandaS;cafu;2026-06-13;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;210.0
+FernandaS;totti;2026-06-13;REALIZADA;Sintomas de alergia respiratória sazonal;Loratadina 10mg ao dia;Sem exames solicitados;0.0
+GabrielT;cafu;2026-06-13;REALIZADA;Dor abdominal recorrente em criança;Antiespasmódico pediátrico;Ultrassom abdominal;0.0
+HenriqueS;vidic;2026-06-13;REALIZADA;Erupção cutânea leve, suspeita de alergia;Pomada anti-histamínica tópica;Sem exames solicitados;0.0
+LarissaD;buffon;2026-06-13;REALIZADA;Falta de ar progressiva aos esforços;Diurético em baixa dose;Eletrocardiograma e raio-X de tórax;0.0
+LarissaD;pele;2026-06-13;REALIZADA;Falta de ar progressiva aos esforços;Diurético em baixa dose;Eletrocardiograma e raio-X de tórax;0.0
+LuanaC;oscar;2026-06-13;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;0.0
+OtávioB;totti;2026-06-13;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;0.0
+PaulaF;vidic;2026-06-13;REALIZADA;Falta de ar progressiva aos esforços;Diurético em baixa dose;Eletrocardiograma e raio-X de tórax;260.0
+PedroM;cr7;2026-06-13;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;255.0
+AndersonR;pirlo;2026-06-14;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;0.0
+AndersonR;terry;2026-06-14;REALIZADA;Check-up de rotina, sem queixas relevantes;Suplementação de vitamina D;Glicemia em jejum;140.0
+BrunoS;raul;2026-06-14;REALIZADA;Quadro de gastrite, dor epigástrica;Omeprazol 20mg em jejum;Endoscopia digestiva;0.0
+FelipeG;balotelli;2026-06-14;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;0.0
+JulianaC;alexis;2026-06-14;REALIZADA;Dor torácica atípica em repouso;Ácido acetilsalicílico 100mg;Teste ergométrico;0.0
+LuanaC;maradona;2026-06-14;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;0.0
+MarcosT;bergkamp;2026-06-14;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;220.0
+MateusC;torres;2026-06-14;REALIZADA;Hipertensão arterial leve detectada;Losartana 50mg, 1x ao dia;Perfil lipídico;0.0
+AlineB;maldini;2026-06-15;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;0.0
+DiegoR;pirlo;2026-06-15;REALIZADA;Falta de ar progressiva aos esforços;Diurético em baixa dose;Eletrocardiograma e raio-X de tórax;0.0
+DiegoR;drogba;2026-06-15;REALIZADA;Paciente com palpitações e cansaço aos esforços;Beta-bloqueador em dose baixa;Eletrocardiograma;0.0
+FernandaS;modric;2026-06-15;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;0.0
+HenriqueS;giggs;2026-06-15;REALIZADA;Criança com febre e irritabilidade;Paracetamol pediátrico conforme peso;Hemograma completo;185.0
+RobertoM;beckham;2026-06-15;REALIZADA;Dor de garganta e febre baixa;Amoxicilina 500mg, 8/8h;Cultura de orofaringe;120.0
+RodrigoS;shevchenko;2026-06-15;REALIZADA;Dor de garganta e febre baixa;Amoxicilina 500mg, 8/8h;Cultura de orofaringe;155.0
+RodrigoS;vanpersie;2026-06-15;REALIZADA;Quadro gripal com tosse seca;Dipirona 500mg se necessário;Sem exames solicitados;155.0
+RodrigoS;kaka;2026-06-15;REALIZADA;Quadro de gastrite, dor epigástrica;Omeprazol 20mg em jejum;Endoscopia digestiva;155.0
+SamuelA;klose;2026-06-15;REALIZADA;Tosse persistente há 3 dias;Xarope expectorante pediátrico;Raio-X de tórax;0.0
+AlexandreC;giggs;2026-06-16;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;0.0
+DanielM;gerrard;2026-06-16;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;0.0
+FelipeG;messi;2026-06-16;REALIZADA;Dor torácica atípica em repouso;Ácido acetilsalicílico 100mg;Teste ergométrico;250.0
+HenriqueS;neymar;2026-06-16;REALIZADA;Tosse persistente há 3 dias;Xarope expectorante pediátrico;Raio-X de tórax;185.0
+LarissaD;neymar;2026-06-16;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;230.0
+LuanaC;bergkamp;2026-06-16;REALIZADA;Criança com febre e irritabilidade;Paracetamol pediátrico conforme peso;Hemograma completo;220.0
+MarcosT;neymar;2026-06-16;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;0.0
+RodrigoS;lampard;2026-06-16;REALIZADA;Sintomas de alergia respiratória sazonal;Loratadina 10mg ao dia;Sem exames solicitados;155.0
+ThiagoA;ribery;2026-06-16;REALIZADA;Hipertensão arterial leve detectada;Losartana 50mg, 1x ao dia;Perfil lipídico;0.0
+BrunoS;casillas;2026-06-17;REALIZADA;Quadro de gastrite, dor epigástrica;Omeprazol 20mg em jejum;Endoscopia digestiva;115.0
+CatarinaD;maradona;2026-06-17;REALIZADA;Quadro de gastrite, dor epigástrica;Omeprazol 20mg em jejum;Endoscopia digestiva;0.0
+CatarinaD;cannavaro;2026-06-17;REALIZADA;Dor de garganta e febre baixa;Amoxicilina 500mg, 8/8h;Cultura de orofaringe;0.0
+DanielM;ribery;2026-06-17;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;180.0
+DéboraF;villa;2026-06-17;REALIZADA;Colesterol elevado com risco cardiovascular;Estatina 20mg à noite;Perfil lipídico completo;275.0
+FelipeG;giggs;2026-06-17;REALIZADA;Paciente com palpitações e cansaço aos esforços;Beta-bloqueador em dose baixa;Eletrocardiograma;0.0
+HenriqueS;zidane;2026-06-17;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;185.0
+JoãoP;terry;2026-06-17;REALIZADA;Dor abdominal recorrente em criança;Antiespasmódico pediátrico;Ultrassom abdominal;185.0
+JoãoP;vanpersie;2026-06-17;REALIZADA;Tosse persistente há 3 dias;Xarope expectorante pediátrico;Raio-X de tórax;185.0
+JulianaC;totti;2026-06-17;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;0.0
+OtávioB;lewa;2026-06-17;REALIZADA;Colesterol elevado com risco cardiovascular;Estatina 20mg à noite;Perfil lipídico completo;280.0
+PatríciaM;drogba;2026-06-17;REALIZADA;Falta de ar progressiva aos esforços;Diurético em baixa dose;Eletrocardiograma e raio-X de tórax;270.0
+PaulaF;giggs;2026-06-17;REALIZADA;Paciente com palpitações e cansaço aos esforços;Beta-bloqueador em dose baixa;Eletrocardiograma;260.0
+RenataC;cafu;2026-06-17;REALIZADA;Check-up de rotina, sem queixas relevantes;Suplementação de vitamina D;Glicemia em jejum;0.0
+CarolinaF;rivaldo;2026-06-18;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;220.0
+ClaraA;vidic;2026-06-18;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;295.0
+EduardoL;balotelli;2026-06-18;REALIZADA;Dor torácica atípica em repouso;Ácido acetilsalicílico 100mg;Teste ergométrico;0.0
+FernandoP;henry;2026-06-18;REALIZADA;Paciente com palpitações e cansaço aos esforços;Beta-bloqueador em dose baixa;Eletrocardiograma;290.0
+LeonardoG;henry;2026-06-18;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;215.0
+MateusC;neymar;2026-06-18;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;0.0
+PedroM;drogba;2026-06-18;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;0.0
+TatianeS;suarez;2026-06-18;REALIZADA;Paciente relata fadiga e dor de cabeça leve;Paracetamol 750mg, 1x ao dia;Hemograma completo;135.0
+DéboraF;vanpersie;2026-06-19;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;0.0
+FernandoP;pele;2026-06-19;REALIZADA;Dor torácica atípica em repouso;Ácido acetilsalicílico 100mg;Teste ergométrico;290.0
+GabrielT;cannavaro;2026-06-19;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;200.0
+LucianaA;villa;2026-06-19;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;0.0
+MarcosT;alexis;2026-06-19;REALIZADA;Tosse persistente há 3 dias;Xarope expectorante pediátrico;Raio-X de tórax;0.0
+MarianaL;robben;2026-06-19;REALIZADA;Tosse persistente há 3 dias;Xarope expectorante pediátrico;Raio-X de tórax;210.0
+OtávioB;ribery;2026-06-19;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;280.0
+PatriciaS;shevchenko;2026-06-19;REALIZADA;Paciente relata fadiga e dor de cabeça leve;Paracetamol 750mg, 1x ao dia;Hemograma completo;110.0
+SamuelA;maradona;2026-06-19;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;205.0
+TatianeS;raul;2026-06-19;REALIZADA;Quadro gripal com tosse seca;Dipirona 500mg se necessário;Sem exames solicitados;0.0
+AlineB;zidane;2026-06-20;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;0.0
+ClaraA;delpiero;2026-06-20;REALIZADA;Avaliação pré-operatória cardiológica;Sem alteração na medicação atual;Ecocardiograma;0.0
+FelipeG;ronaldinho;2026-06-20;REALIZADA;Colesterol elevado com risco cardiovascular;Estatina 20mg à noite;Perfil lipídico completo;250.0
+GabrielT;eto;2026-06-20;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;200.0
+MarceloA;henry;2026-06-20;REALIZADA;Erupção cutânea leve, suspeita de alergia;Pomada anti-histamínica tópica;Sem exames solicitados;210.0
+PedroM;balotelli;2026-06-20;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;255.0
+BeatrizN;ibra;2026-06-21;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;200.0
+ClaraA;lampard;2026-06-21;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;295.0
+DiegoR;ronaldinho;2026-06-21;REALIZADA;Acompanhamento de arritmia já diagnosticada;Ajuste de antiarrítmico;Holter 24 horas;0.0
+EduardoL;ribery;2026-06-21;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;0.0
+LuanaC;pirlo;2026-06-21;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;0.0
+MarceloA;casillas;2026-06-21;REALIZADA;Atualização do calendário vacinal;Sem prescrição medicamentosa;Sem exames solicitados;210.0
+PaulaF;pele;2026-06-21;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;0.0
+PaulaF;messi;2026-06-21;REALIZADA;Avaliação pré-operatória cardiológica;Sem alteração na medicação atual;Ecocardiograma;260.0
+SamuelA;haaland;2026-06-21;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;0.0
+SimoneR;beckenbauer;2026-06-21;REALIZADA;Quadro gripal com tosse seca;Dipirona 500mg se necessário;Sem exames solicitados;140.0
+SofiaM;ribery;2026-06-21;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;0.0
+SofiaM;rooney;2026-06-21;REALIZADA;Colesterol elevado com risco cardiovascular;Estatina 20mg à noite;Perfil lipídico completo;0.0
+ThiagoA;lampard;2026-06-21;REALIZADA;Sintomas de alergia respiratória sazonal;Loratadina 10mg ao dia;Sem exames solicitados;130.0
+VanessaM;bergkamp;2026-06-21;REALIZADA;Dor lombar associada a má postura;Anti-inflamatório por 5 dias;Raio-X de coluna lombar;170.0
+AlexandreC;modric;2026-06-22;REALIZADA;Quadro gripal com tosse seca;Dipirona 500mg se necessário;Sem exames solicitados;0.0
+BrunoS;terry;2026-06-22;REALIZADA;Dor de garganta e febre baixa;Amoxicilina 500mg, 8/8h;Cultura de orofaringe;115.0
+CamilaP;lewa;2026-06-22;REALIZADA;Tosse persistente há 3 dias;Xarope expectorante pediátrico;Raio-X de tórax;0.0
+LeonardoG;delpiero;2026-06-22;REALIZADA;Erupção cutânea leve, suspeita de alergia;Pomada anti-histamínica tópica;Sem exames solicitados;215.0
+PatriciaS;scholes;2026-06-22;REALIZADA;Quadro de gastrite, dor epigástrica;Omeprazol 20mg em jejum;Endoscopia digestiva;0.0
+PatriciaS;villa;2026-06-22;REALIZADA;Paciente relata fadiga e dor de cabeça leve;Paracetamol 750mg, 1x ao dia;Hemograma completo;0.0
+PedroM;balotelli;2026-06-22;REALIZADA;Hipertensão de difícil controle;Associação de losartana e anlodipino;MAPA 24 horas;255.0
+RodrigoS;rivaldo;2026-06-22;REALIZADA;Quadro gripal com tosse seca;Dipirona 500mg se necessário;Sem exames solicitados;0.0
+BeatrizN;bergkamp;2026-06-23;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;200.0
+DiegoR;robben;2026-06-23;REALIZADA;Dor torácica atípica em repouso;Ácido acetilsalicílico 100mg;Teste ergométrico;0.0
+FernandaS;gerrard;2026-06-23;REALIZADA;Check-up de rotina, sem queixas relevantes;Suplementação de vitamina D;Glicemia em jejum;0.0
+GustavoP;neymar;2026-06-23;REALIZADA;Sopro cardíaco identificado em exame de rotina;Sem prescrição neste momento;Ecocardiograma transtorácico;240.0
+JoãoP;klose;2026-06-23;REALIZADA;Atualização do calendário vacinal;Sem prescrição medicamentosa;Sem exames solicitados;185.0
+LeonardoG;cafu;2026-06-23;REALIZADA;Quadro de otite leve;Amoxicilina suspensão pediátrica;Sem exames solicitados;215.0
+LuanaC;beckenbauer;2026-06-23;REALIZADA;Criança com febre e irritabilidade;Paracetamol pediátrico conforme peso;Hemograma completo;220.0
+LuanaC;bergkamp;2026-06-23;REALIZADA;Diarreia leve e desidratação moderada;Soro de reidratação oral;Exame de fezes;220.0
+MarcosT;vidic;2026-06-23;REALIZADA;Acompanhamento de crescimento e desenvolvimento;Suplemento vitamínico infantil;Sem exames solicitados;220.0
+RafaelN;delpiero;2026-06-23;REALIZADA;Quadro gripal com tosse seca;Dipirona 500mg se necessário;Sem exames solicitados;160.0
+RenataC;robben;2026-06-23;REALIZADA;Sintomas de alergia respiratória sazonal;Loratadina 10mg ao dia;Sem exames solicitados;150.0
+RenataC;suarez;2026-06-23;REALIZADA;Check-up de rotina, sem queixas relevantes;Suplementação de vitamina D;Glicemia em jejum;150.0
+SofiaM;suarez;2026-06-23;REALIZADA;Avaliação pré-operatória cardiológica;Sem alteração na medicação atual;Ecocardiograma;260.0
+MuriloA;messi;2026-06-24;REALIZADA;Lesão no tendão do calcâneo;Morfina 10mg;Tomografia computadorizada em T1;0.0
+RobertoM;neymar;2026-06-24;REALIZADA;Dor no dedo minidinho do pé esquerdo, ressaca, dor no punho;Dipirona, vergonha na cara;Nenhum;120.0
+RobertoM;messi;2026-06-24;CANCELADA;;;;-1.0
+RobertoM;cr7;2026-06-24;CANCELADA;;;;-1.0
+RobertoM;haaland;2026-06-24;AGENDADA;;;;-1.0

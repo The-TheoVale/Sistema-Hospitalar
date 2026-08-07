@@ -1,10 +1,50 @@
 id;nome;senha;idade;planoSaude
-Theo;Theo Vale;12345;32;Unimed
-Ant;Antônio Frota;123;15;não tenho
-JM;João Miguel;JoaoM;12;Hapvida
-jsfael;José Rafael;Fael;22;Unimed
-samuel;Samuel Oliveira;s09;20;Hapvida
-igots;Igor Cordeiro;ig;63;Unimed
-lulu;Luiz Castro;loud;15;Amil
-Tutuba;Arthur Michael;frifas;30;Amil 
-bape;Kylian Mbappé;psg;27;Unimed
+messi;Lionel Messi;m10;34;Unimed
+cr7;Cristiano Ronaldo;cr7;38;Hapvida
+neymar;Neymar Jr;njr;32;não tenho
+haaland;Erling Haaland;eh9;25;Unimed
+lewa;Robert Lewandowski;rl9;36;Hapvida
+kaka;Kaká;kaka22;40;Amil
+ronaldinho;Ronaldinho Gaúcho;rg10;39;Unimed
+zidane;Zinedine Zidane;zz5;40;Hapvida
+iniesta;Andrés Iniesta;ai8;38;Amil
+xavi;Xavi Hernández;xavi6;39;Unimed
+suarez;Luis Suárez;ls9;35;não tenho
+benzema;Karim Benzema;kb9;37;Unimed
+modric;Luka Modrić;lm10;39;Hapvida
+casillas;Iker Casillas;ic1;40;Amil
+buffon;Gianluigi Buffon;gb1;41;Unimed
+pirlo;Andrea Pirlo;ap21;40;Hapvida
+cafu;Cafu;c2;39;Amil
+rivaldo;Rivaldo;r10;38;Unimed
+pele;Pelé;pele;40;Hapvida
+maradona;Diego Maradona;dm10;40;Amil
+beckenbauer;Franz Beckenbauer;fb5;40;Unimed
+maldini;Paolo Maldini;pm3;40;Hapvida
+rooney;Wayne Rooney;wr10;35;Amil
+gerrard;Steven Gerrard;sg8;36;Unimed
+beckham;David Beckham;db7;40;Amil
+scholes;Paul Scholes;ps18;39;Unimed
+lampard;Frank Lampard;fl8;38;Hapvida
+terry;John Terry;jt26;37;não tenho
+vidic;Nemanja Vidić;nv15;36;Unimed
+ribery;Franck Ribéry;fr7;35;Amil
+robben;Arjen Robben;ar11;36;Hapvida
+drogba;Didier Drogba;dd11;37;Unimed
+eto;Samuel Eto'o;se9;38;não tenho
+henry;Thierry Henry;th14;39;Amil
+bergkamp;Dennis Bergkamp;db10;40;Unimed
+vanpersie;Robin van Persie;rvp20;36;Hapvida
+torres;Fernando Torres;ft9;35;Amil
+villa;David Villa;dv7;36;Unimed
+raul;Raúl González;rg7;40;Hapvida
+delpiero;Alessandro Del Piero;adp10;40;Amil
+totti;Francesco Totti;ft10;40;Unimed
+shevchenko;Andriy Shevchenko;as7;39;Hapvida
+balotelli;Mario Balotelli;mb45;32;Amil
+ibra;Zlatan Ibrahimović;zi9;40;Unimed
+cannavaro;Fabio Cannavaro;fc5;40;Hapvida
+giggs;Ryan Giggs;rg11;40;Amil
+klose;Miroslav Klose;mk11;39;Unimed
+oscar;Oscar dos Santos;oscar;30;Hapvida
+alexis;Alexis Sánchez;as7;32;Amil

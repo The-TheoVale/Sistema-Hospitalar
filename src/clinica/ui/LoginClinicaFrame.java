@@ -4,9 +4,14 @@ import clinica.repositorio.PacienteRepository;
 import clinica.service.ConsultaService;
 import clinica.repositorio.AvaliacaoRepository;
 import clinica.repositorio.ConsultaRepository;
+import clinica.repositorio.ContaRepository;
+import clinica.repositorio.ListaEsperaRepository;
 import clinica.repositorio.MedicoRepository;
+import clinica.repositorio.NotificacaoRepository;
 import clinica.model.Paciente;
+import clinica.model.ListaEspera;
 import clinica.model.Medico;
+import clinica.model.Notificacao;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +27,8 @@ public class LoginClinicaFrame extends JFrame {
     private final MedicoRepository medicoRepo = new MedicoRepository();
     private final ConsultaRepository consultaRepo = new ConsultaRepository(medicoRepo, pacienteRepo);
     private final AvaliacaoRepository avaliacaoRepo = new AvaliacaoRepository(consultaRepo);
+    private final ContaRepository contaRepository = new ContaRepository(pacienteRepo);
+    private final ListaEsperaRepository listaEsperaRepo = new ListaEsperaRepository(medicoRepo, pacienteRepo);
 
     public LoginClinicaFrame() {
         super("Login - Sistema de Clínica Médica");

@@ -35,7 +35,6 @@ public class AgendamentoService {
         Paciente promovido = listaEsperaRepositorio.promoverProximo(consulta.getMedico().getId(), consulta.getData());
 
     if (promovido != null){
-        System.err.println("teste if");
         Consulta novaConsulta = new Consulta (consulta.getMedico(), promovido, consulta.getData());
         consultaRepositorio.cadastrarConsulta(novaConsulta);
         consultaRepositorio.salvar();

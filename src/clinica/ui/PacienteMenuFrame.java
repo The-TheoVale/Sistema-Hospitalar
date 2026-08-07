@@ -65,12 +65,20 @@ public class PacienteMenuFrame extends JFrame {
     btnAvaliar.addActionListener(e -> new AvaliarConsultaFrame(paciente, consultaRepo).setVisible(true));
 
 
+
     // Novo botão Pagar
     JButton btnPagar = new JButton("Pagar");
     btnPagar.setBackground(Color.ORANGE);
     btnPagar.setForeground(Color.BLACK);
     btnPagar.addActionListener(e -> new PagamentoFrame(paciente, pacienteRepo).setVisible(true));
 
+    JButton btnLogout = new JButton("Sair");
+    btnLogout.setBackground(Color.GRAY);
+    btnLogout.setForeground(Color.WHITE);
+    btnLogout.addActionListener(e -> {
+        new LoginClinicaFrame().setVisible(true);
+        dispose();
+    });
 
     // Adiciona todos os botões ao painel
     buttonPanel.add(btnAgendar);
@@ -78,6 +86,7 @@ public class PacienteMenuFrame extends JFrame {
     buttonPanel.add(btnAlterar);
     buttonPanel.add(btnAvaliar);
     buttonPanel.add(btnPagar);
+    buttonPanel.add(btnLogout);
 
     northPanel.add(lblTitulo);
     northPanel.add(separator);

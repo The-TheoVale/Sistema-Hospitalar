@@ -57,10 +57,19 @@ public class MedicoMenuFrame extends JFrame {
         btnAlterar.setForeground(Color.WHITE);
         btnAlterar.addActionListener(e -> new AlterarDadosFrame(medico, medicoRepo).setVisible(true));
 
+        JButton btnLogout = new JButton("Sair");
+        btnLogout.setBackground(Color.GRAY);
+        btnLogout.setForeground(Color.WHITE);
+        btnLogout.addActionListener(e -> {
+            new LoginClinicaFrame().setVisible(true);
+            dispose();
+        });
+
         buttonPanel.add(btnRealizar);
         buttonPanel.add(btnAvaliacoes);
         buttonPanel.add(btnAlterar);
-
+        buttonPanel.add(btnLogout);
+        
         northPanel.add(lblTitulo);
         northPanel.add(separator);
         northPanel.add(buttonPanel);

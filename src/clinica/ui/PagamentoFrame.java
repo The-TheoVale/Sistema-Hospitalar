@@ -1,7 +1,7 @@
 package clinica.ui;
 
-import clinica.model.Paciente;
 import clinica.model.Conta;
+import clinica.model.Paciente;
 import clinica.model.StatusPagamento;
 import clinica.repositorio.ContaRepository;
 import clinica.repositorio.PacienteRepository;
@@ -9,10 +9,8 @@ import clinica.repositorio.PacienteRepository;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PagamentoFrame extends JFrame {
@@ -21,6 +19,7 @@ public class PagamentoFrame extends JFrame {
     private final ContaRepository contaRepo;
     private JTable tabela;
     private DefaultTableModel modelo;
+    private List<Conta> contas = new ArrayList<>();
 
     public PagamentoFrame(Paciente paciente, PacienteRepository pacienteRepo) {
         super("Pagamento");
@@ -28,7 +27,7 @@ public class PagamentoFrame extends JFrame {
         this.contaRepo = new ContaRepository(pacienteRepo);
 
         initComponents();
-        carregarContasPendentes();
+        carregarContas();
     }
 
     private void initComponents() {
@@ -55,7 +54,10 @@ public class PagamentoFrame extends JFrame {
         add(headerPanel, BorderLayout.NORTH);
 
         // Tabela
-        modelo = new DefaultTableModel(new Object[]{"Valor", "Situação", "Pagar"}, 0);
+        modelo = new DefaultTableModel(new Object[]{"Valor", "Vencimento", "Situação", "Pagar"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return column == 3; }
+        };
         tabela = new JTable(modelo);
         tabela.setRowHeight(40);
 
@@ -74,13 +76,19 @@ public class PagamentoFrame extends JFrame {
         add(southPanel, BorderLayout.SOUTH);
     }
 
-    private void carregarContasPendentes() {
+    private void carregarContas() {
         modelo.setRowCount(0);
-        List<Conta> contas = contaRepo.buscarPorPaciente(paciente.getId());
+        try {
+            contas = contaRepo.buscarPorPaciente(paciente.getId());
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            contas = new ArrayList<>();
+        }
         for (Conta c : contas) {
             modelo.addRow(new Object[]{
-                    c.getValor(),
-                    c.getSituacao(),
+                    String.format("R$ %.2f", c.getValorCobrado()),
+                    FormUtil.formatar(c.getDataDeVencimento()),
+                    c.getSituacao().getValorBanco(),
                     "Pagar"
             });
         }
@@ -96,21 +104,16 @@ public class PagamentoFrame extends JFrame {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            Conta conta = contaRepo.buscarPorPaciente(paciente.getId()).get(row);
-            if (conta.getSituacao() == StatusPagamento.PAGA) {
-                setEnabled(false);
-                setBackground(Color.LIGHT_GRAY);
-            } else {
-                setEnabled(true);
-                setBackground(Color.ORANGE);
-            }
+            boolean paga = row < contas.size() && contas.get(row).getSituacao() == StatusPagamento.PAGA;
+            setEnabled(!paga);
+            setBackground(paga ? Color.LIGHT_GRAY : Color.ORANGE);
             return this;
         }
     }
 
     // Editor do botão
     class ButtonEditor extends DefaultCellEditor {
-        private JButton button;
+        private final JButton button;
         private int row;
 
         public ButtonEditor(JCheckBox checkBox) {
@@ -118,12 +121,9 @@ public class PagamentoFrame extends JFrame {
             button = new JButton("Pagar");
             button.setBackground(Color.ORANGE);
             button.setForeground(Color.BLACK);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
-                    pagarConta(row);
-                }
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                pagarConta(row);
             });
         }
 
@@ -141,17 +141,19 @@ public class PagamentoFrame extends JFrame {
     }
 
     private void pagarConta(int row) {
-        List<Conta> contas = contaRepo.buscarPorPaciente(paciente.getId());
-        if (row < contas.size()) {
-            Conta conta = contas.get(row);
-            if (conta.getSituacao() == StatusPagamento.PENDENTE) {
+        if (row >= contas.size()) return;
+        Conta conta = contas.get(row);
+        if (conta.getSituacao() == StatusPagamento.PENDENTE) {
+            try {
+                contaRepo.pagar(conta.getIdConta());
                 conta.pagar();
-                contaRepo.salvar();
-                JOptionPane.showMessageDialog(this, "Conta de R$" + conta.getValor() + " paga com sucesso!");
-                carregarContasPendentes();
-            } else {
-                JOptionPane.showMessageDialog(this, "Essa conta já está paga.");
+                JOptionPane.showMessageDialog(this, String.format("Conta de R$ %.2f paga com sucesso!", conta.getValorCobrado()));
+            } catch (RuntimeException e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
+            carregarContas();
+        } else {
+            JOptionPane.showMessageDialog(this, "Essa conta já está paga.");
         }
     }
 }

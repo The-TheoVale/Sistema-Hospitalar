@@ -11,15 +11,13 @@ public class MedicoMenuFrame extends JFrame {
     private final MedicoRepository medicoRepo;
     private final PacienteRepository pacienteRepo;
     private final ConsultaRepository consultaRepo;
-    private final AvaliacaoRepository avaliacaoRepo;
 
-    public MedicoMenuFrame(Medico medico, PacienteRepository pacienteRepo, MedicoRepository medicoRepo, ConsultaRepository consultaRepo, AvaliacaoRepository avaliacaoRepo) {
+    public MedicoMenuFrame(Medico medico, PacienteRepository pacienteRepo, MedicoRepository medicoRepo, ConsultaRepository consultaRepo) {
         super("Menu do Médico");
         this.medico = medico;
         this.medicoRepo = medicoRepo;
         this.pacienteRepo = pacienteRepo;
         this.consultaRepo = consultaRepo;
-        this.avaliacaoRepo = avaliacaoRepo;
         
         initComponents();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -45,12 +43,9 @@ public class MedicoMenuFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         JButton btnRealizar = new JButton("Realizar Consulta");
         btnRealizar.setBackground(Color.GREEN);
-        btnRealizar.addActionListener(e -> new RealizarConsultaFrame(medico, medicoRepo, pacienteRepo).setVisible(true));
+        btnRealizar.addActionListener(e -> new RealizarConsultaFrame(medico, pacienteRepo, consultaRepo).setVisible(true));
 
 
-        JButton btnAvaliacoes = new JButton("Avaliações");
-        btnAvaliacoes.setBackground(Color.WHITE);
-        btnAvaliacoes.addActionListener(e -> new AvaliacoesFrame(medico, medicoRepo, pacienteRepo).setVisible(true));
 
         JButton btnAlterar = new JButton("Alterar Dados");
         btnAlterar.setBackground(Color.BLUE);
@@ -66,7 +61,6 @@ public class MedicoMenuFrame extends JFrame {
         });
 
         buttonPanel.add(btnRealizar);
-        buttonPanel.add(btnAvaliacoes);
         buttonPanel.add(btnAlterar);
         buttonPanel.add(btnLogout);
         
@@ -77,7 +71,7 @@ public class MedicoMenuFrame extends JFrame {
         add(northPanel, BorderLayout.NORTH);
 
         // Espaço central
-        add(new EstatisticasPanel(medicoRepo, consultaRepo), BorderLayout.CENTER);
+        add(new EstatisticasPanel(consultaRepo), BorderLayout.CENTER);
 
     }
 }

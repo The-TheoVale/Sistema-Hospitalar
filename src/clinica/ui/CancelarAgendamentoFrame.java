@@ -1,41 +1,32 @@
 package clinica.ui;
 
-import clinica.model.Paciente;
 import clinica.model.Consulta;
-import clinica.model.Medico;
-import clinica.model.Avaliacao;
-import clinica.repositorio.PacienteRepository;
-import clinica.repositorio.MedicoRepository;
+import clinica.model.Paciente;
 import clinica.repositorio.ConsultaRepository;
-import clinica.repositorio.ListaEsperaRepository;
+import clinica.repositorio.UtilizaRepository;
 import clinica.service.AgendamentoService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CancelarAgendamentoFrame extends JFrame {
 
     private final Paciente paciente;
-    private final PacienteRepository pacienteRepo;
-    private final MedicoRepository medicoRepo;
-    private ConsultaRepository consultaRepo;
-    private ListaEsperaRepository listaRepo;
+    private final ConsultaRepository consultaRepo;
+    private final AgendamentoService agendamentoService;
     private JTable tabelaConsultas;
     private DefaultTableModel modeloTabela;
+    private List<Consulta> consultas = new ArrayList<>();
 
-    public CancelarAgendamentoFrame(Paciente paciente, PacienteRepository pacienteRepo, MedicoRepository medicoRepo) {
+    public CancelarAgendamentoFrame(Paciente paciente, ConsultaRepository consultaRepo) {
         super("Cancelar Agendamento");
         this.paciente = paciente;
-        this.pacienteRepo = pacienteRepo;
-        this.medicoRepo = medicoRepo;
-        this.consultaRepo = new ConsultaRepository(medicoRepo, pacienteRepo);
-        this.listaRepo = new ListaEsperaRepository(medicoRepo, pacienteRepo);
+        this.consultaRepo = consultaRepo;
+        this.agendamentoService = new AgendamentoService(consultaRepo, new UtilizaRepository());
         initComponents();
         carregarConsultas();
     }
@@ -65,8 +56,11 @@ public class CancelarAgendamentoFrame extends JFrame {
 
         // Tabela de consultas
         modeloTabela = new DefaultTableModel(
-            new Object[]{"Médico", "Especialidade", "Data", "Ação"}, 0
-        );
+            new Object[]{"Médico", "Especialidade", "Data/Hora", "Ação"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return column == 3; }
+        };
 
         tabelaConsultas = new JTable(modeloTabela);
         tabelaConsultas.setRowHeight(40);
@@ -81,13 +75,18 @@ public class CancelarAgendamentoFrame extends JFrame {
 
     private void carregarConsultas() {
         modeloTabela.setRowCount(0);
-        List<Consulta> consultas = consultaRepo.buscarAgendadas(paciente.getId());
+        try {
+            consultas = consultaRepo.buscarAgendadas(paciente.getId());
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            consultas = new ArrayList<>();
+        }
 
         for (Consulta c : consultas) {
             modeloTabela.addRow(new Object[]{
-                    c.getMedico().getNome(),
+                    c.getMedico().getNomeCompleto(),
                     c.getMedico().getEspecialidade(),
-                    c.getData().toString(),
+                    c.getDataHora().format(FormUtil.DATA_HORA),
                     "-"
             });
         }
@@ -109,7 +108,7 @@ public class CancelarAgendamentoFrame extends JFrame {
 
     // Editor do botão
     class ButtonEditor extends DefaultCellEditor {
-        private JButton button;
+        private final JButton button;
         private int row;
 
         public ButtonEditor(JCheckBox checkBox) {
@@ -117,12 +116,9 @@ public class CancelarAgendamentoFrame extends JFrame {
             button = new JButton("-");
             button.setBackground(Color.RED);
             button.setForeground(Color.WHITE);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
-                    cancelarConsulta(row);
-                }
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                cancelarConsulta(row);
             });
         }
 
@@ -140,23 +136,23 @@ public class CancelarAgendamentoFrame extends JFrame {
     }
 
     private void cancelarConsulta(int row) {
-        String medicoNome = (String) tabelaConsultas.getValueAt(row, 0);
-        String dataStr = (String) tabelaConsultas.getValueAt(row, 2);
+        if (row >= consultas.size()) return;
+        Consulta consulta = consultas.get(row);
 
-        // Identificador da consulta é composto internamente, aqui simplificamos
-        Consulta consulta = consultaRepo.buscarAgendadas(paciente.getId()).stream()
-                .filter(c -> c.getMedico().getNome().equals(medicoNome) && c.getData().toString().equals(dataStr))
-                .findFirst().orElse(null);
+        int opcao = JOptionPane.showConfirmDialog(this,
+                "Cancelar a consulta de " + consulta.getDataHora().format(FormUtil.DATA_HORA) + "?",
+                "Confirmar cancelamento", JOptionPane.YES_NO_OPTION);
+        if (opcao != JOptionPane.YES_OPTION) return;
 
-        if (consulta != null) {
-            AgendamentoService service = new AgendamentoService(consultaRepo, listaRepo);
-            boolean sucesso = service.cancelar(consulta.getIdentificador());
-            if (sucesso) {
+        try {
+            if (agendamentoService.cancelar(consulta.getIdConsulta())) {
                 JOptionPane.showMessageDialog(this, "Consulta cancelada com sucesso!");
-                carregarConsultas();
             } else {
                 JOptionPane.showMessageDialog(this, "Erro ao cancelar consulta.");
             }
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
+        carregarConsultas();
     }
 }

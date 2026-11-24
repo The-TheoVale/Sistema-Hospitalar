@@ -1,80 +1,46 @@
 package clinica.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Consulta {
+    private int idConsulta;
     private Medico medico;
     private Paciente paciente;
-    private LocalDate data;
-    private String descricao;
-    private String receita;
-    private String exames;
+    private LocalDateTime dataHora;
     private StatusConsulta status;
-    private double valorPago;
-    public Consulta(Medico medico, Paciente paciente, LocalDate data) {
-        this.medico = medico;
-        this.paciente = paciente;
-        this.data = data;
-        status = StatusConsulta.AGENDADA;
-        valorPago = -1;
+    private String descricao;
+
+    /** Construtor para nova consulta (ainda não persistida). */
+    public Consulta(Medico medico, Paciente paciente, LocalDateTime dataHora) {
+        this(0, medico, paciente, dataHora, StatusConsulta.AGENDADA, null);
     }
 
-    public void realizar (String descricao, String receita, String exames){
+    /** Construtor usado ao carregar do banco. */
+    public Consulta(int idConsulta, Medico medico, Paciente paciente,
+                    LocalDateTime dataHora, StatusConsulta status, String descricao) {
+        this.idConsulta = idConsulta;
+        this.medico = medico;
+        this.paciente = paciente;
+        this.dataHora = dataHora;
+        this.status = status;
         this.descricao = descricao;
-        this.receita = receita;
-        this.exames = exames;
+    }
 
-        if (paciente.temPlano() && medico.aceitaPlano(paciente.getPlanoSaude())){
-            this.valorPago = 0;
-        } else {
-            this.valorPago = medico.getValorConsulta();
-        }
-        
+    /** Marca a consulta como realizada e registra a descrição do atendimento. */
+    public void realizar(String descricao) {
+        this.descricao = descricao;
         this.status = StatusConsulta.REALIZADA;
     }
 
+    public int getIdConsulta()          { return idConsulta; }
+    public void setIdConsulta(int id)   { this.idConsulta = id; }
 
-    public void setStatus(StatusConsulta status) {
-        this.status = status;
-    }
+    public Medico getMedico()           { return medico; }
+    public Paciente getPaciente()       { return paciente; }
+    public LocalDateTime getDataHora()  { return dataHora; }
+    public StatusConsulta getStatus()   { return status; }
+    public String getDescricao()        { return descricao; }
 
-
-    public String getIdentificador(){
-        return medico.getId() + "_" + paciente.getId() + "_" + this.data;
-    }
-    public Medico getMedico() {
-        return medico;
-    }
-    public Paciente getPaciente() {
-        return paciente;
-    }
-    public LocalDate getData() {
-        return data;
-    }
-    public StatusConsulta getStatus() {
-        return status;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public String getReceita() {
-        return receita;
-    }
-
-    public String getExames() {
-        return exames;
-    }
-
-    public double getValorPago() {
-        return valorPago;
-    }
-
-    public void setValorPago(double valorPago) {
-        this.valorPago = valorPago;
-    }
-
-    
-    
+    public void setStatus(StatusConsulta status)   { this.status = status; }
+    public void setDescricao(String descricao)     { this.descricao = descricao; }
 }

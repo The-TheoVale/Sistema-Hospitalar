@@ -1,78 +1,67 @@
 package clinica.ui;
 
-import clinica.model.Avaliacao;
-import clinica.model.Medico;
 import clinica.model.Consulta;
-import clinica.model.Conta;
+import clinica.model.Medico;
+import clinica.model.Receita;
 import clinica.model.StatusConsulta;
-import clinica.model.Notificacao;
-import clinica.repositorio.MedicoRepository;
-import clinica.repositorio.PacienteRepository;
-import clinica.service.ConsultaService;
 import clinica.repositorio.ConsultaRepository;
 import clinica.repositorio.ContaRepository;
-import clinica.repositorio.NotificacaoRepository;
-import clinica.repositorio.AvaliacaoRepository;
+import clinica.repositorio.PacienteRepository;
+import clinica.repositorio.ReceitaRepository;
+import clinica.repositorio.UtilizaRepository;
+import clinica.service.ConsultaService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RealizarConsultaFrame extends JFrame {
 
     private final Medico medico;
-    private final MedicoRepository medicoRepo;
-    private final PacienteRepository pacienteRepo;
-    private ConsultaRepository consultaRepo;
-    private ConsultaService consultaServico;
-    private AvaliacaoRepository avaliacaoRepo;
-    private ContaRepository contaRepo;
+    private final ConsultaRepository consultaRepo;
+    private final ReceitaRepository receitaRepo = new ReceitaRepository();
+    private final ConsultaService consultaServico;
     private JTable tabelaConsultas;
     private DefaultTableModel modeloTabela;
+    private List<Consulta> consultas = new ArrayList<>();
 
-    public RealizarConsultaFrame(Medico medico, MedicoRepository medicoRepo, PacienteRepository pacienteRepo) {
+    public RealizarConsultaFrame(Medico medico, PacienteRepository pacienteRepo, ConsultaRepository consultaRepo) {
         super("Realizar Consulta");
         this.medico = medico;
-        this.medicoRepo = medicoRepo;
-        this.pacienteRepo = pacienteRepo;
-        this.contaRepo = new ContaRepository(pacienteRepo);
-        this.consultaRepo = new ConsultaRepository(medicoRepo, pacienteRepo);
-        this.avaliacaoRepo = new AvaliacaoRepository(consultaRepo);
-        this.consultaServico = new ConsultaService(consultaRepo, contaRepo, avaliacaoRepo);
+        this.consultaRepo = consultaRepo;
+        this.consultaServico = new ConsultaService(consultaRepo, new ContaRepository(pacienteRepo),
+                receitaRepo, new UtilizaRepository());
         initComponents();
         carregarConsultas();
     }
 
     private void initComponents() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(900, 600);
+        setSize(1000, 650);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         initHeader();
 
-        // Tabela de consultas
         modeloTabela = new DefaultTableModel(
-            new Object[]{"Paciente", "Data", "Consultar"}, 0
-        );
+            new Object[]{"Paciente", "Data/Hora", "Consultar"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return column == 2; }
+        };
 
         tabelaConsultas = new JTable(modeloTabela);
         tabelaConsultas.setRowHeight(40);
 
-        // Renderizador e editor para o botão consultar
         tabelaConsultas.getColumn("Consultar").setCellRenderer(new ButtonRenderer());
         tabelaConsultas.getColumn("Consultar").setCellEditor(new ButtonEditor(new JCheckBox()));
 
-        JScrollPane scrollPane = new JScrollPane(tabelaConsultas);
-        add(scrollPane, BorderLayout.CENTER);
+        add(new JScrollPane(tabelaConsultas), BorderLayout.CENTER);
 
-        // Botão voltar
         JButton btnVoltar = new JButton("Voltar");
         btnVoltar.addActionListener(e -> dispose());
         add(btnVoltar, BorderLayout.SOUTH);
@@ -98,55 +87,52 @@ public class RealizarConsultaFrame extends JFrame {
 
     private void carregarConsultas() {
         modeloTabela.setRowCount(0);
-        List<Consulta> consultas = consultaRepo.buscarAgendadasPorMedico(medico.getId());
-
+        try {
+            consultas = consultaRepo.buscarAgendadasPorMedico(medico.getId());
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            consultas = new ArrayList<>();
+        }
         for (Consulta c : consultas) {
             modeloTabela.addRow(new Object[]{
-                    c.getPaciente().getNome(),
-                    c.getData().toString(),
+                    c.getPaciente().getNomeCompleto(),
+                    c.getDataHora().format(FormUtil.DATA_HORA),
                     "Consultar"
             });
         }
     }
 
-    // Renderizador do botão
+    /** Só é possível realizar consultas do dia atual. */
+    private boolean podeRealizar(int row) {
+        return row < consultas.size() && consultas.get(row).getDataHora().toLocalDate().equals(LocalDate.now());
+    }
+
     class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setText("Consultar");
-            setBackground(Color.BLUE);
             setForeground(Color.WHITE);
         }
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            LocalDate dataConsulta = LocalDate.parse((String) table.getValueAt(row, 1));
-            if (!dataConsulta.equals(LocalDate.now())) {
-                setEnabled(false);
-                setBackground(Color.LIGHT_GRAY);
-            } else {
-                setEnabled(true);
-                setBackground(Color.BLUE);
-            }
+            boolean ok = podeRealizar(row);
+            setEnabled(ok);
+            setBackground(ok ? Color.BLUE : Color.LIGHT_GRAY);
             return this;
         }
     }
 
-    // Editor do botão
     class ButtonEditor extends DefaultCellEditor {
-        private JButton button;
+        private final JButton button;
         private int row;
 
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton("Consultar");
-            button.setBackground(Color.BLUE);
             button.setForeground(Color.WHITE);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
-                    realizarConsulta(row);
-                }
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                realizarConsulta(row);
             });
         }
 
@@ -154,14 +140,9 @@ public class RealizarConsultaFrame extends JFrame {
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             this.row = row;
-            LocalDate dataConsulta = LocalDate.parse((String) table.getValueAt(row, 1));
-            if (!dataConsulta.equals(LocalDate.now())) {
-                button.setEnabled(false);
-                button.setBackground(Color.LIGHT_GRAY);
-            } else {
-                button.setEnabled(true);
-                button.setBackground(Color.BLUE);
-            }
+            boolean ok = podeRealizar(row);
+            button.setEnabled(ok);
+            button.setBackground(ok ? Color.BLUE : Color.LIGHT_GRAY);
             return button;
         }
 
@@ -172,116 +153,114 @@ public class RealizarConsultaFrame extends JFrame {
     }
 
     private void realizarConsulta(int row) {
-        String pacienteNome = (String) tabelaConsultas.getValueAt(row, 0);
-        String dataStr = (String) tabelaConsultas.getValueAt(row, 1);
+        if (!podeRealizar(row)) return;
+        Consulta consulta = consultas.get(row);
 
-        Consulta consulta = consultaRepo.buscarAgendadasPorMedico(medico.getId()).stream()
-                .filter(c -> c.getPaciente().getNome().equals(pacienteNome) && c.getData().toString().equals(dataStr))
-                .findFirst().orElse(null);
+        getContentPane().removeAll();
+        initHeader();
 
-        if (consulta != null && consulta.getData().equals(LocalDate.now())) {
-            // Limpa o conteúdo e recria cabeçalho
-            getContentPane().removeAll();
-            initHeader();
+        JPanel mainPanel = new JPanel(new GridLayout(1,2));
 
-            JPanel mainPanel = new JPanel(new GridLayout(1,2));
+        // Painel esquerdo
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 
-            // Painel esquerdo
-            JPanel leftPanel = new JPanel();
-            leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.add(new JLabel("Médico: " + medico.getNomeCompleto()));
+        leftPanel.add(new JLabel("Paciente: " + consulta.getPaciente().getNomeCompleto()));
+        leftPanel.add(new JLabel("Data/Hora: " + consulta.getDataHora().format(FormUtil.DATA_HORA)));
 
-            leftPanel.add(new JLabel("Médico: " + medico.getNome()));
-            leftPanel.add(new JLabel("Paciente: " + consulta.getPaciente().getNome()));
-            leftPanel.add(new JLabel("Data: " + consulta.getData()));
+        JTextArea taDescricao = new JTextArea(4,30);
+        JTextArea taPrescricao = new JTextArea(4,30);
+        JTextArea taOrientacao = new JTextArea(3,30);
+        JTextField tfValidade = new JTextField(10);
+        tfValidade.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-            JTextArea tfDescricao = new JTextArea(5,30);
-            JTextArea tfReceita = new JTextArea(5,30);
-            JTextArea tfExames = new JTextArea(5,30);
+        leftPanel.add(new JLabel("Descrição / diagnóstico:"));
+        leftPanel.add(new JScrollPane(taDescricao));
+        leftPanel.add(new JLabel("Receita — prescrição (deixe vazio se não houver):"));
+        leftPanel.add(new JScrollPane(taPrescricao));
+        leftPanel.add(new JLabel("Receita — orientação:"));
+        leftPanel.add(new JScrollPane(taOrientacao));
+        leftPanel.add(new JLabel("Validade da receita (dd/mm/aaaa):"));
+        leftPanel.add(tfValidade);
 
-            leftPanel.add(new JLabel("Descrição:"));
-            leftPanel.add(new JScrollPane(tfDescricao));
-            leftPanel.add(new JLabel("Receita:"));
-            leftPanel.add(new JScrollPane(tfReceita));
-            leftPanel.add(new JLabel("Exames:"));
-            leftPanel.add(new JScrollPane(tfExames));
-
-            JButton btnFinalizar = new JButton("Finalizar Consulta");
-            btnFinalizar.addActionListener(e -> {
-                try {
-                    consultaServico.realizarConsulta(consulta.getIdentificador(), tfDescricao.getText(), tfReceita.getText(), tfExames.getText());
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this,"Erro: "+ex.getMessage());
+        JButton btnFinalizar = new JButton("Finalizar Consulta");
+        btnFinalizar.addActionListener(e -> {
+            try {
+                String prescricao = taPrescricao.getText().trim();
+                LocalDate validade = FormUtil.parseDataOpcional(tfValidade.getText(), "Validade da receita");
+                if (prescricao.isEmpty() && (!taOrientacao.getText().isBlank() || validade != null)) {
+                    throw new IllegalArgumentException("Informe a prescrição para salvar a receita.");
                 }
-
-                NotificacaoRepository notifRepo = new NotificacaoRepository();
-                notifRepo.cadastrarNotificacao(
-                    new Notificacao(
-                        consulta.getPaciente().getId(),
-                        "📢 SPAM: Sua consulta em " + consulta.getData() +
-                        " com Dr(a). " + medico.getNome() +
-                        " foi finalizada. Por favor, avalie sua experiência!"
-                    )
-                );
-
-               
+                if (validade != null && validade.isBefore(LocalDate.now())) {
+                    throw new IllegalArgumentException("A validade da receita não pode ser anterior a hoje.");
+                }
+                consultaServico.realizarConsulta(consulta.getIdConsulta(),
+                        FormUtil.vazioParaNull(taDescricao.getText()), prescricao,
+                        FormUtil.vazioParaNull(taOrientacao.getText()), validade);
                 JOptionPane.showMessageDialog(this,"Consulta finalizada!");
                 dispose();
-            });
-            leftPanel.add(btnFinalizar);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,"Erro: "+ex.getMessage());
+            }
+        });
+        leftPanel.add(btnFinalizar);
 
-            // Painel direito
-            JPanel rightPanel = new JPanel(new BorderLayout());
-            JButton btnVerProntuario = new JButton("Ver Prontuário");
-            rightPanel.add(btnVerProntuario, BorderLayout.CENTER);
+        // Painel direito
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        JButton btnVerProntuario = new JButton("Ver Prontuário");
+        rightPanel.add(btnVerProntuario, BorderLayout.CENTER);
 
-            btnVerProntuario.addActionListener(e -> {
-                rightPanel.removeAll();
+        btnVerProntuario.addActionListener(e -> {
+            rightPanel.removeAll();
 
-                String[] colunas = {"Data","Médico","Diagnóstico","Medicamentos","Exames","Valor"};
-                DefaultTableModel modelo = new DefaultTableModel(colunas,0);
-                JTable tabelaProntuario = new JTable(modelo);
+            String[] colunas = {"Data/Hora","Médico","Descrição","Prescrição","Orientação","Validade"};
+            DefaultTableModel modelo = new DefaultTableModel(colunas,0);
+            JTable tabelaProntuario = new JTable(modelo);
 
-                for (Consulta c : consultaRepo.buscarPorPaciente(consulta.getPaciente().getId())){
-                    if (c.getStatus().equals(StatusConsulta.REALIZADA)){
-                        modelo.addRow(new Object[]{
-                            c.getData(),
-                            c.getMedico().getNome(),
-                            c.getDescricao(),
-                            c.getReceita(),
-                            c.getExames(),
-                            c.getValorPago()
-                        });
+            try {
+                for (Consulta c : consultaRepo.buscarPorPaciente(consulta.getPaciente().getId())) {
+                    if (c.getStatus() != StatusConsulta.REALIZADA) continue;
+                    List<Receita> receitas = receitaRepo.buscarPorConsulta(c.getIdConsulta());
+                    if (receitas.isEmpty()) {
+                        modelo.addRow(new Object[]{c.getDataHora().format(FormUtil.DATA_HORA),
+                                c.getMedico().getNomeCompleto(), c.getDescricao(), "", "", ""});
+                    }
+                    for (Receita r : receitas) {
+                        modelo.addRow(new Object[]{c.getDataHora().format(FormUtil.DATA_HORA),
+                                c.getMedico().getNomeCompleto(), c.getDescricao(),
+                                r.getPrescricao(), r.getOrientacao(), FormUtil.formatar(r.getDataValidade())});
                     }
                 }
-                
+            } catch (RuntimeException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
 
-                rightPanel.add(new JScrollPane(tabelaProntuario), BorderLayout.CENTER);
+            rightPanel.add(new JScrollPane(tabelaProntuario), BorderLayout.CENTER);
 
-                JButton btnOcultar = new JButton("Ocultar Prontuário");
-                btnOcultar.addActionListener(ev -> {
-                    rightPanel.removeAll();
-                    rightPanel.add(btnVerProntuario, BorderLayout.CENTER);
-                    rightPanel.revalidate();
-                    rightPanel.repaint();
-                });
-                rightPanel.add(btnOcultar, BorderLayout.SOUTH);
-
+            JButton btnOcultar = new JButton("Ocultar Prontuário");
+            btnOcultar.addActionListener(ev -> {
+                rightPanel.removeAll();
+                rightPanel.add(btnVerProntuario, BorderLayout.CENTER);
                 rightPanel.revalidate();
                 rightPanel.repaint();
             });
+            rightPanel.add(btnOcultar, BorderLayout.SOUTH);
 
-            mainPanel.add(leftPanel);
-            mainPanel.add(rightPanel);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+        });
 
-            add(mainPanel, BorderLayout.CENTER);
+        mainPanel.add(leftPanel);
+        mainPanel.add(rightPanel);
 
-            // Botão voltar
-            JButton btnVoltar = new JButton("Voltar");
-            btnVoltar.addActionListener(e -> dispose());
-            add(btnVoltar, BorderLayout.SOUTH);
+        add(mainPanel, BorderLayout.CENTER);
 
-            revalidate();
-            repaint();
-        }
+        JButton btnVoltar = new JButton("Voltar");
+        btnVoltar.addActionListener(e -> dispose());
+        add(btnVoltar, BorderLayout.SOUTH);
+
+        revalidate();
+        repaint();
     }
 }

@@ -1,17 +1,13 @@
 package clinica.ui;
 
-import clinica.repositorio.PacienteRepository;
-import clinica.service.ConsultaService;
-import clinica.repositorio.AvaliacaoRepository;
-import clinica.repositorio.ConsultaRepository;
-import clinica.repositorio.ContaRepository;
-import clinica.repositorio.ListaEsperaRepository;
-import clinica.repositorio.MedicoRepository;
-import clinica.repositorio.NotificacaoRepository;
-import clinica.model.Paciente;
-import clinica.model.ListaEspera;
+import clinica.exception.LoginInvalidoException;
 import clinica.model.Medico;
-import clinica.model.Notificacao;
+import clinica.model.Paciente;
+import clinica.model.Usuario;
+import clinica.repositorio.ConsultaRepository;
+import clinica.repositorio.MedicoRepository;
+import clinica.repositorio.PacienteRepository;
+import clinica.service.AuthService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,9 +22,6 @@ public class LoginClinicaFrame extends JFrame {
     private final PacienteRepository pacienteRepo = new PacienteRepository();
     private final MedicoRepository medicoRepo = new MedicoRepository();
     private final ConsultaRepository consultaRepo = new ConsultaRepository(medicoRepo, pacienteRepo);
-    private final AvaliacaoRepository avaliacaoRepo = new AvaliacaoRepository(consultaRepo);
-    private final ContaRepository contaRepository = new ContaRepository(pacienteRepo);
-    private final ListaEsperaRepository listaEsperaRepo = new ListaEsperaRepository(medicoRepo, pacienteRepo);
 
     public LoginClinicaFrame() {
         super("Login - Sistema de Clínica Médica");
@@ -57,7 +50,7 @@ public class LoginClinicaFrame extends JFrame {
         pfSenha.setPreferredSize(new Dimension(200, 30));
 
         gbc.gridx=0; gbc.gridy=0;
-        center.add(new JLabel("Login:"), gbc);
+        center.add(new JLabel("E-mail:"), gbc);
         gbc.gridx=1; gbc.gridy=0;
         center.add(tfLogin, gbc);
 
@@ -80,28 +73,24 @@ public class LoginClinicaFrame extends JFrame {
         });
     }
 
-  private void autenticar() {
-    String login = tfLogin.getText().trim();
-    String senha = new String(pfSenha.getPassword()).trim();
+    private void autenticar() {
+        String login = tfLogin.getText().trim();
+        String senha = new String(pfSenha.getPassword()).trim();
 
-    if (login.isEmpty() || senha.isEmpty()) {
-        JOptionPane.showMessageDialog(this,"Preencha login e senha.","Aviso",JOptionPane.WARNING_MESSAGE);
-        return;
+        try {
+            Usuario usuario = new AuthService(medicoRepo, pacienteRepo).login(login, senha);
+            if (usuario instanceof Paciente p) {
+                JOptionPane.showMessageDialog(this,"Login de paciente realizado com sucesso!");
+                new PacienteMenuFrame(p, pacienteRepo, medicoRepo, consultaRepo).setVisible(true);
+            } else if (usuario instanceof Medico m) {
+                JOptionPane.showMessageDialog(this,"Login de médico realizado com sucesso!");
+                new MedicoMenuFrame(m, pacienteRepo, medicoRepo, consultaRepo).setVisible(true);
+            }
+            dispose();
+        } catch (LoginInvalidoException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao acessar o banco: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
-
-    Paciente p = pacienteRepo.buscarPorId(login);
-    Medico m = medicoRepo.buscarPorId(login);
-
-    if (p != null && p.getSenha().equals(senha)) {
-        JOptionPane.showMessageDialog(this,"Login de paciente realizado com sucesso!");
-        new PacienteMenuFrame(p, pacienteRepo, medicoRepo, consultaRepo, avaliacaoRepo).setVisible(true);
-        dispose();
-    } else if (m != null && m.getSenha().equals(senha)) {
-        JOptionPane.showMessageDialog(this,"Login de médico realizado com sucesso!");
-        new MedicoMenuFrame(m, pacienteRepo, medicoRepo, consultaRepo, avaliacaoRepo).setVisible(true);
-        dispose();
-    } else {
-        JOptionPane.showMessageDialog(this,"Login ou senha incorretos.","Erro",JOptionPane.ERROR_MESSAGE);
-    }
-   }
 }

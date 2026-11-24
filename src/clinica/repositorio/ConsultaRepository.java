@@ -1,144 +1,237 @@
 package clinica.repositorio;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import clinica.config.Conexao;
+import clinica.model.*;
 
-import clinica.model.Consulta;
-import clinica.model.Medico;
-import clinica.model.Paciente;
-import clinica.model.StatusConsulta;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ConsultaRepository {
-    private MedicoRepository medicosRepositorio;
-    private PacienteRepository pacienteRepository;
-    private List<Consulta> consultas;
+    private final MedicoRepository medicoRepositorio;
+    private final PacienteRepository pacienteRepositorio;
 
-    public ConsultaRepository(MedicoRepository medicosRepositorio, PacienteRepository pacienteRepository) {
-        this.medicosRepositorio = medicosRepositorio;
-        this.pacienteRepository = pacienteRepository;
-        this.consultas = new ArrayList<>();
-        carregar();
+    public ConsultaRepository(MedicoRepository medicoRepositorio, PacienteRepository pacienteRepositorio) {
+        this.medicoRepositorio = medicoRepositorio;
+        this.pacienteRepositorio = pacienteRepositorio;
     }
 
-    public void salvar(){
-        File pasta = new File("dados");
-        pasta.mkdirs();
+    // -----------------------------------------------------------------------
+    // Escrita
+    // -----------------------------------------------------------------------
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("dados/consultas.csv"))) {
-            bw.write("idMedico;idPaciente;data;status;descricao;receita;exames;valorPago");
-            bw.newLine();
-
-            for (Consulta c : consultas){
-                String descricaoFile = checarNull(c.getDescricao());
-                String receitaFile = checarNull(c.getReceita());
-                String examesFile = checarNull(c.getExames());
-                String linha = String.join(";", c.getMedico().getId(), c.getPaciente().getId(), String.valueOf(c.getData()), String.valueOf(c.getStatus()), descricaoFile, receitaFile, examesFile, String.valueOf(c.getValorPago()));
-                bw.write(linha);
-                bw.newLine();
+    public Consulta cadastrarConsulta(Consulta c) {
+        String sql = """
+                INSERT INTO consulta (data_hora, status, descricao, id_usuario_medico, id_usuario_paciente)
+                VALUES (?, ?, ?, ?, ?)
+                """;
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setTimestamp(1, Timestamp.valueOf(c.getDataHora()));
+            ps.setString(2, c.getStatus().getValorBanco());
+            ps.setString(3, c.getDescricao());
+            ps.setInt(4, c.getMedico().getId());
+            ps.setInt(5, c.getPaciente().getId());
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) c.setIdConsulta(rs.getInt(1));
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao cadastrar consulta: " + e.getMessage(), e);
+        }
+        return c;
+    }
 
-            
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar consulta: " + e.getMessage());
+    public void atualizar(Consulta c) {
+        String sql = "UPDATE consulta SET status = ?, descricao = ? WHERE id_consulta = ?";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, c.getStatus().getValorBanco());
+            ps.setString(2, c.getDescricao());
+            ps.setInt(3, c.getIdConsulta());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar consulta: " + e.getMessage(), e);
         }
     }
 
+    /** Cancelamento: a consulta é removida do banco (o banco não possui status "Cancelada"). */
+    public boolean deletar(int idConsulta) {
+        String sql = "DELETE FROM consulta WHERE id_consulta = ? AND status = 'Agendada'";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idConsulta);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao cancelar consulta: " + e.getMessage(), e);
+        }
+    }
 
-    private void carregar(){
-        File arquivo = new File("dados/consultas.csv");
-        if (!arquivo.exists()) return;
+    // -----------------------------------------------------------------------
+    // Leitura
+    // -----------------------------------------------------------------------
 
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
-            br.readLine();
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                String[] campos = linha.split(";");
-                Medico medico = medicosRepositorio.buscarPorId(campos[0]);
-                Paciente paciente = pacienteRepository.buscarPorId(campos[1]);
-                LocalDate data = LocalDate.parse(campos[2]);
-                Consulta consulta = new Consulta(medico, paciente, data);
+    public Consulta buscarPorId(int idConsulta) {
+        List<Consulta> r = consultar("SELECT * FROM consulta WHERE id_consulta = ?", idConsulta);
+        return r.isEmpty() ? null : r.get(0);
+    }
 
-                if (campos[3].equals("REALIZADA")){
-                    consulta.realizar(campos[4], campos[5], campos[6]);
-                    consulta.setValorPago(Double.parseDouble(campos[7]));
-                } else if (campos[3].equals("CANCELADA")){
-                    consulta.setStatus(StatusConsulta.CANCELADA);
+    public List<Consulta> listarTodos() {
+        return consultar("SELECT * FROM consulta ORDER BY data_hora");
+    }
+
+    public List<Consulta> buscarPorPaciente(int idPaciente) {
+        return consultar("SELECT * FROM consulta WHERE id_usuario_paciente = ? ORDER BY data_hora", idPaciente);
+    }
+
+    public List<Consulta> buscarAgendadas(int idPaciente) {
+        return consultar("SELECT * FROM consulta WHERE id_usuario_paciente = ? AND status = 'Agendada' ORDER BY data_hora",
+                idPaciente);
+    }
+
+    public List<Consulta> buscarAgendadasPorMedico(int idMedico) {
+        return consultar("SELECT * FROM consulta WHERE id_usuario_medico = ? AND status = 'Agendada' ORDER BY data_hora",
+                idMedico);
+    }
+
+    /** Verifica se o horário está livre e se o médico ainda não atingiu o limite diário. */
+    public boolean disponibilidadeDoMedico(Medico medico, LocalDateTime dataHora) {
+        String sqlHorario = "SELECT COUNT(*) FROM consulta WHERE id_usuario_medico = ? AND data_hora = ?";
+        String sqlDia = "SELECT COUNT(*) FROM consulta WHERE id_usuario_medico = ? AND data_hora::date = ?";
+        try (Connection con = Conexao.conectar()) {
+            try (PreparedStatement ps = con.prepareStatement(sqlHorario)) {
+                ps.setInt(1, medico.getId());
+                ps.setTimestamp(2, Timestamp.valueOf(dataHora));
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) return false;
                 }
-                consultas.add(consulta);
             }
-            
-        } catch (Exception e) {
-            System.err.println("Erro ao carregar consultas: " + e.getMessage());
+            try (PreparedStatement ps = con.prepareStatement(sqlDia)) {
+                ps.setInt(1, medico.getId());
+                ps.setDate(2, Date.valueOf(dataHora.toLocalDate()));
+                try (ResultSet rs = ps.executeQuery()) {
+                    return !rs.next() || rs.getInt(1) < medico.maxConsultasDia();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar disponibilidade: " + e.getMessage(), e);
         }
     }
 
-    private String checarNull(String campo) {
-        return (campo == null) ? "" : campo.replace(";", ",");
-    }
-
-    public Consulta buscarPorIdentificador(String identificador){
-        for (Consulta c : consultas){
-            if (c.getIdentificador().equals(identificador)) return c;
+    /** Horários já ocupados do médico em um dia. */
+    public List<LocalDateTime> horariosOcupados(int idMedico, LocalDate dia) {
+        List<LocalDateTime> lista = new ArrayList<>();
+        String sql = "SELECT data_hora FROM consulta WHERE id_usuario_medico = ? AND data_hora::date = ?";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idMedico);
+            ps.setDate(2, Date.valueOf(dia));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(rs.getTimestamp(1).toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar horários: " + e.getMessage(), e);
         }
-        return null;
+        return lista;
     }
 
-    public List<Consulta> listarTodos(){
-        return consultas;
-    }
+    // -----------------------------------------------------------------------
+    // Estatísticas
+    // -----------------------------------------------------------------------
 
-    public void cadastrarConsulta( Consulta consulta){
-        consultas.add(consulta);
-        salvar();
-    }
-
-    public List<Consulta> buscarPorPaciente (String idPaciente){
-        List<Consulta> busca = new ArrayList<>();
-
-        for (Consulta c : consultas){
-            if (c.getPaciente().getId().equals(idPaciente)){
-                busca.add(c);
-            } 
+    public int totalRealizadas() {
+        String sql = "SELECT COUNT(*) FROM consulta WHERE status = 'Realizada'";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao contar consultas: " + e.getMessage(), e);
         }
-        return busca;
     }
 
-    public List<Consulta> buscarAgendadas (String idPaciente){
-        List<Consulta> busca = new ArrayList<>();
-
-        for (Consulta c : consultas){
-            if (c.getPaciente().getId().equals(idPaciente) && c.getStatus().equals(StatusConsulta.AGENDADA)){
-                busca.add(c);
-            } 
+    /** Quantidade de consultas por especialidade (Clínico Geral = médico sem tabela filha). */
+    public Map<String, Integer> contarPorEspecialidade() {
+        String sql = """
+                SELECT CASE
+                         WHEN ca.id_usuario IS NOT NULL THEN 'Cardiologista'
+                         WHEN pe.id_usuario IS NOT NULL THEN 'Pediatra'
+                         WHEN ci.id_usuario IS NOT NULL THEN 'Cirurgião'
+                         ELSE 'Clínico Geral'
+                       END AS especialidade,
+                       COUNT(*) AS total
+                  FROM consulta c
+                  LEFT JOIN cardiologista ca ON ca.id_usuario = c.id_usuario_medico
+                  LEFT JOIN pediatra      pe ON pe.id_usuario = c.id_usuario_medico
+                  LEFT JOIN cirurgiao     ci ON ci.id_usuario = c.id_usuario_medico
+                 GROUP BY 1
+                 ORDER BY total DESC
+                """;
+        Map<String, Integer> mapa = new LinkedHashMap<>();
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) mapa.put(rs.getString("especialidade"), rs.getInt("total"));
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao contar por especialidade: " + e.getMessage(), e);
         }
-        return busca;
+        return mapa;
     }
 
-    public List<Consulta> buscarAgendadasPorMedico (String idMedico){
-        List<Consulta> busca = new ArrayList<>();
-
-        for (Consulta c : consultas){
-            if (c.getMedico().getId().equals(idMedico) && c.getStatus().equals(StatusConsulta.AGENDADA)){
-                busca.add(c);
-            } 
+    /** Quantidade de consultas por médico (nome completo → total), em ordem decrescente. */
+    public Map<String, Integer> contarPorMedico() {
+        String sql = """
+                SELECT m.nome || COALESCE(' ' || m.sobrenome, '') AS medico, COUNT(*) AS total
+                  FROM consulta c
+                  JOIN medico m ON m.id_usuario = c.id_usuario_medico
+                 GROUP BY m.id_usuario, m.nome, m.sobrenome
+                 ORDER BY total DESC
+                """;
+        Map<String, Integer> mapa = new LinkedHashMap<>();
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) mapa.put(rs.getString("medico"), rs.getInt("total"));
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao contar por médico: " + e.getMessage(), e);
         }
-        return busca;
+        return mapa;
     }
 
-    public boolean disponibilidadeDoMedico (String idMedico, LocalDate data){
-        int contador = 0;
-        
-        for (Consulta c : consultas){
-            if (!c.getStatus().equals(StatusConsulta.CANCELADA) && c.getMedico().getId().equals(idMedico) && c.getData().equals(data)) contador++;
+    // -----------------------------------------------------------------------
+    // Mapeamento
+    // -----------------------------------------------------------------------
+
+    private List<Consulta> consultar(String sql, Object... params) {
+        List<Consulta> lista = new ArrayList<>();
+        Map<Integer, Medico> medicos = new HashMap<>();
+        Map<Integer, Paciente> pacientes = new HashMap<>();
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idMedico = rs.getInt("id_usuario_medico");
+                    int idPaciente = rs.getInt("id_usuario_paciente");
+                    Medico medico = medicos.computeIfAbsent(idMedico, medicoRepositorio::buscarPorId);
+                    Paciente paciente = pacientes.computeIfAbsent(idPaciente, pacienteRepositorio::buscarPorId);
+                    lista.add(new Consulta(
+                            rs.getInt("id_consulta"),
+                            medico,
+                            paciente,
+                            rs.getTimestamp("data_hora").toLocalDateTime(),
+                            StatusConsulta.fromBanco(rs.getString("status")),
+                            rs.getString("descricao")));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar consultas: " + e.getMessage(), e);
         }
-        
-        Medico medico = medicosRepositorio.buscarPorId(idMedico);
-        return contador < medico.maxConsultasDia();
+        return lista;
     }
 }

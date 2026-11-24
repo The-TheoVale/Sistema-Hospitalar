@@ -1,13 +1,17 @@
 package clinica.ui;
 
-import clinica.model.Paciente;
+import clinica.model.Cardiologista;
+import clinica.model.Cirurgiao;
 import clinica.model.Medico;
-import clinica.repositorio.PacienteRepository;
+import clinica.model.Paciente;
+import clinica.model.Pediatra;
+import clinica.model.Usuario;
 import clinica.repositorio.MedicoRepository;
+import clinica.repositorio.PacienteRepository;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.time.LocalDate;
 
 public class AlterarDadosFrame extends JFrame {
 
@@ -15,6 +19,10 @@ public class AlterarDadosFrame extends JFrame {
     private final Medico medico;
     private final PacienteRepository pacienteRepo;
     private final MedicoRepository medicoRepo;
+
+    private final JPanel centerPanel = new JPanel(new GridBagLayout());
+    private final GridBagConstraints gbc = new GridBagConstraints();
+    private int row = 0;
 
     public AlterarDadosFrame(Paciente paciente, PacienteRepository pacienteRepo) {
         super("Alterar Dados - Paciente");
@@ -34,9 +42,14 @@ public class AlterarDadosFrame extends JFrame {
         initComponents();
     }
 
+    private void adicionarCampo(String rotulo, JComponent campo) {
+        gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel(rotulo), gbc);
+        gbc.gridx=1; centerPanel.add(campo, gbc); row++;
+    }
+
     private void initComponents() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(600, 400);
+        setSize(650, 650);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -57,54 +70,63 @@ public class AlterarDadosFrame extends JFrame {
 
         add(headerPanel, BorderLayout.NORTH);
 
-        // Painel central com campos editáveis
-        JPanel centerPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8,8,8,8);
+        gbc.insets = new Insets(6,8,6,8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField tfId = new JTextField();
+        Usuario usuario = (paciente != null) ? paciente : medico;
+
+        JTextField tfId = new JTextField(String.valueOf(usuario.getId()), 20);
         tfId.setEditable(false); // ID não deve ser alterado
-        JTextField tfNome = new JTextField();
-        JPasswordField pfSenha = new JPasswordField();
+        JTextField tfNome = new JTextField(usuario.getNome(), 20);
+        JTextField tfSobrenome = new JTextField(usuario.getSobrenome(), 20);
+        JTextField tfEmail = new JTextField(usuario.getEmail(), 20);
+        JPasswordField pfSenha = new JPasswordField(usuario.getSenha(), 20);
+        JTextField tfDataNasc = new JTextField(FormUtil.formatar(usuario.getDataNascimento()), 20);
+        JComboBox<String> cbSexo = new JComboBox<>(FormUtil.SEXOS);
+        cbSexo.setSelectedItem(String.valueOf(usuario.getSexo()));
 
-        int row=0;
-        gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("ID:"), gbc);
-        gbc.gridx=1; centerPanel.add(tfId, gbc); row++;
+        adicionarCampo("ID:", tfId);
+        adicionarCampo("Nome*:", tfNome);
+        adicionarCampo("Sobrenome:", tfSobrenome);
+        adicionarCampo("E-mail*:", tfEmail);
+        adicionarCampo("Senha*:", pfSenha);
+        adicionarCampo("Data de nascimento* (dd/mm/aaaa):", tfDataNasc);
+        adicionarCampo("Sexo:", cbSexo);
 
-        gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Nome:"), gbc);
-        gbc.gridx=1; centerPanel.add(tfNome, gbc); row++;
+        Runnable aplicarComuns = () -> {
+            FormUtil.exigir(!tfNome.getText().isBlank(), "Informe o nome.");
+            FormUtil.validarEmail(tfEmail.getText().trim());
+            FormUtil.exigir(pfSenha.getPassword().length > 0, "Informe a senha.");
+            LocalDate nasc = FormUtil.parseData(tfDataNasc.getText(), "Data de nascimento");
+            FormUtil.exigir(!nasc.isAfter(LocalDate.now()), "Data de nascimento não pode ser futura.");
+            usuario.setNome(tfNome.getText().trim());
+            usuario.setSobrenome(FormUtil.vazioParaNull(tfSobrenome.getText()));
+            usuario.setEmail(tfEmail.getText().trim());
+            usuario.setSenha(new String(pfSenha.getPassword()).trim());
+            usuario.setDataNascimento(nasc);
+            usuario.setSexo(((String) cbSexo.getSelectedItem()).charAt(0));
+        };
 
-        gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Senha:"), gbc);
-        gbc.gridx=1; centerPanel.add(pfSenha, gbc); row++;
+        JButton btnSalvar = new JButton("Salvar Alterações");
 
         if (paciente != null) {
-            JTextField tfIdade = new JTextField();
-            JTextField tfPlano = new JTextField();
+            JTextField tfCpf = new JTextField(paciente.getCpf(), 20);
+            JTextField tfEndereco = new JTextField(paciente.getEndereco(), 20);
+            JTextField tfTelefone = new JTextField(paciente.getTelefone(), 20);
 
-            gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Idade:"), gbc);
-            gbc.gridx=1; centerPanel.add(tfIdade, gbc); row++;
-
-            gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Plano de Saúde:"), gbc);
-            gbc.gridx=1; centerPanel.add(tfPlano, gbc); row++;
-
-            // Preenche com dados atuais
-            tfId.setText(paciente.getId());
-            tfNome.setText(paciente.getNome());
-            pfSenha.setText(paciente.getSenha());
-            tfIdade.setText(String.valueOf(paciente.getIdade()));
-            tfPlano.setText(paciente.getPlanoSaude());
-
-            JButton btnSalvar = new JButton("Salvar Alterações");
-            gbc.gridx=1; gbc.gridy=row+1; centerPanel.add(btnSalvar, gbc);
+            adicionarCampo("CPF*:", tfCpf);
+            adicionarCampo("Endereço:", tfEndereco);
+            adicionarCampo("Telefone:", tfTelefone);
 
             btnSalvar.addActionListener(e -> {
-                paciente.setNome(tfNome.getText().trim());
-                paciente.setSenha(new String(pfSenha.getPassword()).trim());
-                paciente.setIdade(Integer.parseInt(tfIdade.getText().trim()));
-                paciente.setPlano(tfPlano.getText().trim());
                 try {
-                    pacienteRepo.salvar(); // regrava CSV
+                    String cpf = FormUtil.somenteDigitos(tfCpf.getText());
+                    FormUtil.exigir(cpf.length() == 11, "CPF deve conter 11 dígitos.");
+                    aplicarComuns.run();
+                    paciente.setCpf(cpf);
+                    paciente.setEndereco(FormUtil.vazioParaNull(tfEndereco.getText()));
+                    paciente.setTelefone(FormUtil.vazioParaNull(tfTelefone.getText()));
+                    pacienteRepo.atualizar(paciente);
                     JOptionPane.showMessageDialog(this,"Dados do paciente atualizados!");
                     dispose();
                 } catch (Exception ex) {
@@ -114,39 +136,74 @@ public class AlterarDadosFrame extends JFrame {
         }
 
         if (medico != null) {
-            JTextField tfEspecialidade = new JTextField();
-            JTextField tfValor = new JTextField();
-            JTextField tfPlanos = new JTextField();
+            JTextField tfEspecialidade = new JTextField(medico.getEspecialidade(), 20);
+            tfEspecialidade.setEditable(false);
+            JTextField tfCrm = new JTextField(medico.getCrm(), 20);
+            JTextField tfValor = new JTextField(String.valueOf(medico.getValorDaConsulta()), 20);
+            JTextField tfTelefone = new JTextField(medico.getTelefoneProfissional(), 20);
 
-            gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Especialidade:"), gbc);
-            gbc.gridx=1; centerPanel.add(tfEspecialidade, gbc); row++;
+            adicionarCampo("Especialidade:", tfEspecialidade);
+            adicionarCampo("CRM*:", tfCrm);
+            adicionarCampo("Valor da consulta* (R$):", tfValor);
+            adicionarCampo("Telefone profissional:", tfTelefone);
 
-            gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Valor Consulta:"), gbc);
-            gbc.gridx=1; centerPanel.add(tfValor, gbc); row++;
+            JCheckBox chkEco = new JCheckBox("Realiza ecocardiograma");
+            JTextField tfFaixa = new JTextField(20);
+            JCheckBox chkRecem = new JCheckBox("Atende recém-nascidos");
+            JTextField tfArea = new JTextField(20);
+            JTextField tfTempo = new JTextField(20);
 
-            gbc.gridx=0; gbc.gridy=row; centerPanel.add(new JLabel("Planos Atendidos:"), gbc);
-            gbc.gridx=1; centerPanel.add(tfPlanos, gbc); row++;
-
-            // Preenche com dados atuais
-            tfId.setText(medico.getId());
-            tfNome.setText(medico.getNome());
-            pfSenha.setText(medico.getSenha());
-            tfEspecialidade.setText(medico.getEspecialidade());
-            tfValor.setText(String.valueOf(medico.getValorConsultaParticular()));
-            tfPlanos.setText(String.join(",", medico.getPlanosAtendidos()));
-
-            JButton btnSalvar = new JButton("Salvar Alterações");
-            gbc.gridx=1; gbc.gridy=row+1; centerPanel.add(btnSalvar, gbc);
+            if (medico instanceof Cardiologista c) {
+                chkEco.setSelected(c.isRealizaEcocardiograma());
+                adicionarCampo("", chkEco);
+            } else if (medico instanceof Pediatra p) {
+                tfFaixa.setText(p.getFaixaEtariaAtendida());
+                chkRecem.setSelected(p.isAtendeRecemNascidos());
+                adicionarCampo("Faixa etária atendida*:", tfFaixa);
+                adicionarCampo("", chkRecem);
+            } else if (medico instanceof Cirurgiao ci) {
+                tfArea.setText(ci.getAreaCirurgica());
+                tfTempo.setText(String.valueOf(ci.getTempoExperiencia()));
+                adicionarCampo("Área cirúrgica*:", tfArea);
+                adicionarCampo("Tempo de experiência (anos):", tfTempo);
+            }
 
             btnSalvar.addActionListener(e -> {
-                medico.setNome(tfNome.getText().trim());
-                medico.setSenha(new String(pfSenha.getPassword()).trim());
-                medico.setEspecialidade(tfEspecialidade.getText().trim());
-                medico.setValorConsultaParticular(Double.parseDouble(tfValor.getText().trim()));
-                medico.setPlanosAtendidos(Arrays.asList(tfPlanos.getText().split(",")));
-                // especialidade, valor e planos poderiam ser atualizados aqui também
                 try {
-                    medicoRepo.salvar();
+                    FormUtil.exigir(!tfCrm.getText().isBlank(), "Informe o CRM.");
+                    double valor;
+                    try {
+                        valor = Double.parseDouble(tfValor.getText().trim().replace(",", "."));
+                    } catch (NumberFormatException ex) {
+                        throw new IllegalArgumentException("Valor da consulta inválido.");
+                    }
+                    FormUtil.exigir(valor > 0, "O valor da consulta deve ser maior que zero.");
+                    if (medico instanceof Pediatra) FormUtil.exigir(!tfFaixa.getText().isBlank(), "Informe a faixa etária.");
+                    short tempo = 0;
+                    if (medico instanceof Cirurgiao) {
+                        FormUtil.exigir(!tfArea.getText().isBlank(), "Informe a área cirúrgica.");
+                        try {
+                            tempo = tfTempo.getText().isBlank() ? 0 : Short.parseShort(tfTempo.getText().trim());
+                        } catch (NumberFormatException ex) {
+                            throw new IllegalArgumentException("Tempo de experiência inválido.");
+                        }
+                        FormUtil.exigir(tempo >= 0 && tempo <= 70, "Tempo de experiência deve estar entre 0 e 70 anos.");
+                    }
+
+                    aplicarComuns.run();
+                    medico.setCrm(tfCrm.getText().trim());
+                    medico.setValorDaConsulta(valor);
+                    medico.setTelefoneProfissional(FormUtil.vazioParaNull(tfTelefone.getText()));
+                    if (medico instanceof Cardiologista c) c.setRealizaEcocardiograma(chkEco.isSelected());
+                    if (medico instanceof Pediatra p) {
+                        p.setFaixaEtariaAtendida(tfFaixa.getText().trim());
+                        p.setAtendeRecemNascidos(chkRecem.isSelected());
+                    }
+                    if (medico instanceof Cirurgiao ci) {
+                        ci.setAreaCirurgica(tfArea.getText().trim());
+                        ci.setTempoExperiencia(tempo);
+                    }
+                    medicoRepo.atualizar(medico);
                     JOptionPane.showMessageDialog(this,"Dados do médico atualizados!");
                     dispose();
                 } catch (Exception ex) {
@@ -155,6 +212,7 @@ public class AlterarDadosFrame extends JFrame {
             });
         }
 
-        add(centerPanel, BorderLayout.CENTER);
+        gbc.gridx=1; gbc.gridy=row+1; centerPanel.add(btnSalvar, gbc);
+        add(new JScrollPane(centerPanel), BorderLayout.CENTER);
     }
 }

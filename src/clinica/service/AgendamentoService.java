@@ -1,47 +1,40 @@
 package clinica.service;
-import clinica.repositorio.*;
-import clinica.model.*;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
+
+import clinica.model.Consulta;
+import clinica.model.Medico;
+import clinica.model.Paciente;
+import clinica.repositorio.ConsultaRepository;
+import clinica.repositorio.UtilizaRepository;
+
 public class AgendamentoService {
-    private ConsultaRepository consultaRepositorio;
-    private ListaEsperaRepository listaEsperaRepositorio;
+    private final ConsultaRepository consultaRepositorio;
+    private final UtilizaRepository utilizaRepositorio;
 
-    
-
-    public AgendamentoService(ConsultaRepository consultaRepositorio, ListaEsperaRepository listaEsperaRepositorio) {
+    public AgendamentoService(ConsultaRepository consultaRepositorio, UtilizaRepository utilizaRepositorio) {
         this.consultaRepositorio = consultaRepositorio;
-        this.listaEsperaRepositorio = listaEsperaRepositorio;
+        this.utilizaRepositorio = utilizaRepositorio;
     }
 
-    public int agendar(Medico medico, Paciente paciente, LocalDate data){
-        if (consultaRepositorio.disponibilidadeDoMedico(medico.getId(), data)) {
-            consultaRepositorio.cadastrarConsulta(new Consulta(medico, paciente, data));
-            return 0;
+    /**
+     * Agenda a consulta. Se o médico foi cadastrado depois do paciente (sem vínculo em {@code utiliza}),
+     * o vínculo é criado com o plano já usado pelo paciente com os demais médicos.
+     * Retorna {@code false} se o horário não estiver disponível.
+     */
+    public boolean agendar(Medico medico, Paciente paciente, LocalDateTime dataHora) {
+        if (!consultaRepositorio.disponibilidadeDoMedico(medico, dataHora)) return false;
+
+        consultaRepositorio.cadastrarConsulta(new Consulta(medico, paciente, dataHora));
+        if (!utilizaRepositorio.existeVinculo(medico.getId(), paciente.getId())) {
+            utilizaRepositorio.cadastrar(medico.getId(), paciente.getId(),
+                    utilizaRepositorio.buscarPlanoDoPaciente(paciente.getId()));
         }
-
-        
-        return listaEsperaRepositorio.adicionarNaFila(medico, paciente, data);
-    }
-
-
-    public boolean cancelar(String identificadorConsulta) {
-        Consulta consulta = consultaRepositorio.buscarPorIdentificador(identificadorConsulta);
-        if (consulta == null) return false;
-
-        consulta.setStatus(StatusConsulta.CANCELADA);
-        consultaRepositorio.salvar();
-        
-
-        Paciente promovido = listaEsperaRepositorio.promoverProximo(consulta.getMedico().getId(), consulta.getData());
-
-    if (promovido != null){
-        Consulta novaConsulta = new Consulta (consulta.getMedico(), promovido, consulta.getData());
-        consultaRepositorio.cadastrarConsulta(novaConsulta);
-        consultaRepositorio.salvar();
-        NotificacaoRepository notifRepo = new NotificacaoRepository();
-        notifRepo.cadastrarNotificacao(new Notificacao(promovido.getId(), "⚠️ SPAM: Você foi promovido da lista de espera e agora possui uma consulta marcada em " + consulta.getData() + " com Dr(a). " + consulta.getMedico().getNome()));
-    }
-
         return true;
+    }
+
+    /** Cancela (remove do banco) uma consulta agendada. */
+    public boolean cancelar(int idConsulta) {
+        return consultaRepositorio.deletar(idConsulta);
     }
 }

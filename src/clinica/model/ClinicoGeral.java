@@ -1,9 +1,13 @@
 package clinica.model;
-import java.util.List;
-public class ClinicoGeral extends Medico{
 
-    public ClinicoGeral(String id, String nome, String senha, double valorConsultaParticular, List<String> planosAtendidos) {
-        super(id, nome, senha, "Clínico Geral", valorConsultaParticular, planosAtendidos);
+import java.time.LocalDate;
+
+public class ClinicoGeral extends Medico {
+
+    public ClinicoGeral(int id, String nome, String sobrenome, String email, String senha,
+                        LocalDate dataNascimento, char sexo, String crm,
+                        double valorDaConsulta, String telefoneProfissional) {
+        super(id, nome, sobrenome, email, senha, dataNascimento, sexo, crm,
+              valorDaConsulta, telefoneProfissional, "Clínico Geral");
     }
-    
 }

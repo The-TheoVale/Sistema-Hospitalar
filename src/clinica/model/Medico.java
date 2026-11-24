@@ -1,62 +1,40 @@
 package clinica.model;
-import java.util.ArrayList;
-import java.util.List;
 
-public abstract class Medico extends Usuario{
+import java.time.LocalDate;
+
+public abstract class Medico extends Usuario {
+    protected String crm;
+    protected double valorDaConsulta;
+    protected String telefoneProfissional;
+    // especialidade é derivada pela subclasse
     protected String especialidade;
-    protected List<String> planosAtendidos;
-    protected double valorConsultaParticular;
-    protected List<Avaliacao> avaliacoes;
-    
-    public Medico(String id, String nome, String senha, String especialidade,double valorConsultaParticular, List<String> planosAtendidos) {
-        super(id, nome, senha);
-        this.planosAtendidos = planosAtendidos;
-        avaliacoes = new ArrayList<>();
+
+    public Medico(int id, String nome, String sobrenome, String email, String senha,
+                  LocalDate dataNascimento, char sexo, String crm,
+                  double valorDaConsulta, String telefoneProfissional, String especialidade) {
+        super(id, nome, sobrenome, email, senha, dataNascimento, sexo, telefoneProfissional);
+        this.crm = crm;
+        this.valorDaConsulta = valorDaConsulta;
+        this.telefoneProfissional = telefoneProfissional;
         this.especialidade = especialidade;
-        this.valorConsultaParticular = valorConsultaParticular;
-}
-
-    public int maxConsultasDia(){
-        return 3;
-    }
-    public double getMediaEstrelas(){
-        return avaliacoes.stream().mapToInt(Avaliacao::getEstrelas).average().orElse(0);
-    }
-    public void adicionarAvaliacao(Avaliacao avaliacao){
-        avaliacoes.add(avaliacao);
     }
 
-    public boolean aceitaPlano (String plano){
-        return planosAtendidos.contains(plano);
-    }
+    /** Máximo de consultas por dia — pode ser sobrescrito por subclasse */
+    public int maxConsultasDia() { return 3; }
 
-    public String getEspecialidade() {
-        return especialidade;
-    }
+    /** Valor base da consulta (pode ser sobrescrito para adicionar taxas) */
+    public double getValorConsulta() { return valorDaConsulta; }
 
-    public List<String> getPlanosAtendidos() {
-        return planosAtendidos;
-    }
+    public String getCrm()                    { return crm; }
+    public double getValorDaConsulta()         { return valorDaConsulta; }
+    public String getTelefoneProfissional()    { return telefoneProfissional; }
+    public String getEspecialidade()           { return especialidade; }
 
-    public double getValorConsultaParticular() {
-        return valorConsultaParticular;
-    }
+    public void setCrm(String crm)                        { this.crm = crm; }
+    public void setValorDaConsulta(double v)              { this.valorDaConsulta = v; }
+    public void setTelefoneProfissional(String t)         { this.telefoneProfissional = t; }
+    public void setEspecialidade(String especialidade)    { this.especialidade = especialidade; }
 
-    public List<Avaliacao> getAvaliacoes() {
-        return avaliacoes;
-    }
-    
-    public double getValorConsulta() {
-        return valorConsultaParticular;
-    }
-
-    public void setSenha(String senha) { this.senha = senha; }
-
-    public void setEspecialidade(String especialidade) { this.especialidade = especialidade;}
-
-    public void setValorConsultaParticular(double valorConsultaParticular) { this.valorConsultaParticular = valorConsultaParticular; }
-    
-    public void setPlanosAtendidos(List<String> planosAtendidos) {
-        this.planosAtendidos = planosAtendidos;
-    }
+    /** Chamado pelo repositório após INSERT para atribuir o id gerado pelo banco. */
+    public void setIdFromDb(int id)                       { this.id = id; }
 }

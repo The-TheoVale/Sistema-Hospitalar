@@ -1,7 +1,5 @@
 package clinica.ui;
 
-import clinica.model.Medico;
-import clinica.repositorio.MedicoRepository;
 import clinica.repositorio.ConsultaRepository;
 import clinica.service.EstatisticasService;
 
@@ -12,11 +10,9 @@ import java.util.Map;
 public class EstatisticasPanel extends JPanel {
 
     private final EstatisticasService estatisticasService;
-    private final MedicoRepository medicoRepo;
 
-    public EstatisticasPanel(MedicoRepository medicoRepo, ConsultaRepository consultaRepo) {
-        this.medicoRepo = medicoRepo;
-        this.estatisticasService = new EstatisticasService(medicoRepo, consultaRepo);
+    public EstatisticasPanel(ConsultaRepository consultaRepo) {
+        this.estatisticasService = new EstatisticasService(consultaRepo);
         initComponents();
     }
 
@@ -36,28 +32,24 @@ public class EstatisticasPanel extends JPanel {
         centerPanel.setLayout(new GridLayout(0, 2, 20, 20)); // grid com espaçamento
         centerPanel.setOpaque(false);
 
-        // Estatísticas em cards
-        Medico melhor = estatisticasService.medicoMaisBemAvaliado();
-        String melhorMedico = (melhor != null) ? melhor.getNome() + " (" + melhor.getMediaEstrelas() + "⭐)" : "Nenhum médico avaliado";
-        centerPanel.add(criarCard("Médico mais bem avaliado", melhorMedico, new Color(173, 216, 230)));
+        try {
+            centerPanel.add(criarCard("Especialidade mais procurada", estatisticasService.especialidadeMaisProcurada(), new Color(255, 228, 196)));
 
-        centerPanel.add(criarCard("Especialidade mais procurada", estatisticasService.especialidadeMaisProcurada(), new Color(255, 228, 196)));
+            centerPanel.add(criarCard("Total de consultas realizadas", String.valueOf(estatisticasService.totalConsultasRealizadas()), new Color(144, 238, 144)));
 
-        centerPanel.add(criarCard("Total de consultas realizadas", String.valueOf(estatisticasService.totalConsultasRealizadas()), new Color(144, 238, 144)));
+            // Gráfico em card
+            Map<String, Integer> consultasPorMedico = estatisticasService.consultasPorMedico();
+            JPanel graficoCard = criarCard("Distribuição de consultas por médico (Top 5)", "", new Color(240, 230, 140));
+            graficoCard.setLayout(new BorderLayout());
 
-        centerPanel.add(criarCard("Média geral de avaliações", String.valueOf(estatisticasService.mediaAvaliacoes()), new Color(255, 182, 193)));
+            GraficoPizzaPanel graficoPizza = new GraficoPizzaPanel(consultasPorMedico);
+            graficoPizza.setPreferredSize(new Dimension(500, 400)); // espaço maior
+            graficoCard.add(graficoPizza, BorderLayout.CENTER);
 
-        // Gráfico em card
-        Map<String, Integer> consultasPorMedico = estatisticasService.consultasPorMedico();
-        JPanel graficoCard = criarCard("Distribuição de consultas por médico (Top 5)", "", new Color(240, 230, 140));
-        graficoCard.setLayout(new BorderLayout());
-
-        // Dá mais espaço para o gráfico de pizza
-        GraficoPizzaPanel graficoPizza = new GraficoPizzaPanel(consultasPorMedico, medicoRepo);
-        graficoPizza.setPreferredSize(new Dimension(500, 400)); // espaço maior
-        graficoCard.add(graficoPizza, BorderLayout.CENTER);
-
-        centerPanel.add(graficoCard);
+            centerPanel.add(graficoCard);
+        } catch (RuntimeException e) {
+            centerPanel.add(criarCard("Erro ao carregar estatísticas", e.getMessage(), new Color(255, 182, 193)));
+        }
 
         add(centerPanel, BorderLayout.CENTER);
     }
@@ -91,7 +83,6 @@ public class EstatisticasPanel extends JPanel {
     // Painel customizado para gráfico de pizza (Top 5 médicos)
     static class GraficoPizzaPanel extends JPanel {
         private final Map<String, Integer> dados;
-        private final MedicoRepository medicoRepo;
         private final Color[] cores = {
                 new Color(100, 149, 237),
                 new Color(255, 99, 71),
@@ -100,9 +91,8 @@ public class EstatisticasPanel extends JPanel {
                 new Color(255, 215, 0)
         };
 
-        public GraficoPizzaPanel(Map<String, Integer> dados, MedicoRepository medicoRepo) {
+        public GraficoPizzaPanel(Map<String, Integer> dados) {
             this.dados = dados;
-            this.medicoRepo = medicoRepo;
             setBackground(Color.WHITE);
         }
 
@@ -138,8 +128,7 @@ public class EstatisticasPanel extends JPanel {
 
                 // Legenda ao lado
                 g2d.setColor(Color.BLACK);
-                String nomeMedico = medicoRepo.buscarPorId(entry.getKey()).getNome();
-                g2d.drawString(nomeMedico + " - " + valor + " consultas", diameter + 60, 20 + i * 25);
+                g2d.drawString(entry.getKey() + " - " + valor + " consultas", diameter + 60, 20 + i * 25);
 
                 startAngle += angle;
                 i++;

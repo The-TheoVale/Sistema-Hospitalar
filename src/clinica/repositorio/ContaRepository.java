@@ -1,91 +1,80 @@
 package clinica.repositorio;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
-
+import clinica.config.Conexao;
 import clinica.model.Conta;
 import clinica.model.Paciente;
 import clinica.model.StatusPagamento;
 
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ContaRepository {
-    private List<Conta> contas;
-    private PacienteRepository pacienteRepositorio;
+    private final PacienteRepository pacienteRepositorio;
 
     public ContaRepository(PacienteRepository pacienteRepositorio) {
         this.pacienteRepositorio = pacienteRepositorio;
-        contas = new ArrayList<>();
-        carregar();
     }
 
-    public void salvar() {
-        File pasta = new File("dados");
-        pasta.mkdirs();
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("dados/contas.csv"))) {
-            bw.write("idPaciente;valor;situacao");
-            bw.newLine();
-
-            for (Conta c : contas) {
-                String linha = String.join(";", c.getPaciente().getId(),
-                        String.valueOf(c.getValor()), String.valueOf(c.getSituacao()));
-                bw.write(linha);
-                bw.newLine();
+    public Conta cadastrarConta(Conta c) {
+        String sql = """
+                INSERT INTO conta (situacao, valor_cobrado, data_de_vencimento, id_usuario, id_consulta)
+                VALUES (?, ?, ?, ?, ?)
+                """;
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, c.getSituacao().getValorBanco());
+            ps.setBigDecimal(2, java.math.BigDecimal.valueOf(c.getValorCobrado()));
+            if (c.getDataDeVencimento() != null) ps.setDate(3, Date.valueOf(c.getDataDeVencimento()));
+            else ps.setNull(3, Types.DATE);
+            ps.setInt(4, c.getPaciente().getId());
+            ps.setInt(5, c.getIdConsulta());
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) c.setIdConta(rs.getInt(1));
             }
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar contas: " + e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao cadastrar conta: " + e.getMessage(), e);
+        }
+        return c;
+    }
+
+    public void pagar(int idConta) {
+        String sql = "UPDATE conta SET situacao = 'Paga' WHERE id_conta = ?";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idConta);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao pagar conta: " + e.getMessage(), e);
         }
     }
 
-    private void carregar() {
-        File arquivo = new File("dados/contas.csv");
-        if (!arquivo.exists()) return;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
-            br.readLine(); // pula cabeçalho
-            String linha;
-
-            while ((linha = br.readLine()) != null) {
-                String[] campos = linha.split(";");
-
-                Paciente paciente = pacienteRepositorio.buscarPorId(campos[0]);
-                double valor = Double.parseDouble(campos[1]);
-
-                Conta conta = new Conta(paciente, valor);
-
-                if (campos[2].equals("PAGA")) {
-                    conta.pagar();
+    public List<Conta> buscarPorPaciente(int idPaciente) {
+        List<Conta> lista = new ArrayList<>();
+        String sql = "SELECT * FROM conta WHERE id_usuario = ? ORDER BY id_conta";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idPaciente);
+            try (ResultSet rs = ps.executeQuery()) {
+                Paciente paciente = null;
+                while (rs.next()) {
+                    if (paciente == null) paciente = pacienteRepositorio.buscarPorId(idPaciente);
+                    Date venc = rs.getDate("data_de_vencimento");
+                    LocalDate vencimento = (venc != null) ? venc.toLocalDate() : null;
+                    lista.add(new Conta(
+                            rs.getInt("id_conta"),
+                            paciente,
+                            rs.getInt("id_consulta"),
+                            rs.getBigDecimal("valor_cobrado").doubleValue(),
+                            vencimento,
+                            StatusPagamento.fromBanco(rs.getString("situacao"))));
                 }
-
-                contas.add(conta);
             }
-        } catch (Exception e) {
-            System.err.println("Erro ao carregar contas: " + e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar contas: " + e.getMessage(), e);
         }
-    }
-
-    public List<Conta> listarTodos() {
-        return contas;
-    }
-
-    public void cadastrarConta(Conta conta) {
-        contas.add(conta);
-        salvar();
-    }
-
-    public List<Conta> buscarPorPaciente(String idPaciente) {
-        List<Conta> resultado = new ArrayList<>();
-
-        for (Conta c : contas) {
-            if (c.getPaciente().getId().equals(idPaciente)) {
-                resultado.add(c);
-            }
-        }
-
-        return resultado;
+        return lista;
     }
 }

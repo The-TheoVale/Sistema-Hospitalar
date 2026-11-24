@@ -1,45 +1,33 @@
 package clinica.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-public class Paciente extends Usuario{
-    private String planoSaude;
-    private List<Consulta> historico;
-    private int idade;
 
-    public Paciente(String id, String nome, String senha, int idade, String planoSaude) {
-        super(id, nome, senha);
-        this.idade = idade;
-        this.planoSaude = planoSaude;
-        historico = new ArrayList<>();
+public class Paciente extends Usuario {
+    private String cpf;
+    private String endereco;
+    private List<Consulta> historico;
+
+    public Paciente(int id, String nome, String sobrenome, String email, String senha,
+                    LocalDate dataNascimento, char sexo, String cpf, String endereco, String telefone) {
+        super(id, nome, sobrenome, email, senha, dataNascimento, sexo, telefone);
+        this.cpf = cpf;
+        this.endereco = endereco;
+        this.historico = new ArrayList<>();
     }
 
-    public void adicionarAoHistorico(Consulta consulta){
+    public void adicionarAoHistorico(Consulta consulta) {
         historico.add(consulta);
     }
 
-    public String getPlanoSaude() {
-        return planoSaude;
-    }
+    public String getCpf()           { return cpf; }
+    public String getEndereco()      { return endereco; }
+    public List<Consulta> getHistorico() { return historico; }
 
-    public List<Consulta> getHistorico() {
-        return historico;
-    }
+    public void setCpf(String cpf)           { this.cpf = cpf; }
+    public void setEndereco(String endereco) { this.endereco = endereco; }
 
-    public int getIdade() {
-        return idade;
-    }
-    
-    public Boolean temPlano(){
-        
-        return !"não tenho".equals(this.planoSaude);
-    }
-
-    public void setIdade(int idade) { this.idade = idade; }
-
-    public void setPlano(String planoSaude) { this.planoSaude = planoSaude; }
-    
-
-
-    
+    /** Chamado pelo repositório após INSERT para atribuir o id gerado pelo banco. */
+    public void setIdFromDb(int id)          { this.id = id; }
 }

@@ -1,9 +1,7 @@
 package clinica.ui;
 
-import clinica.model.Notificacao;
 import clinica.model.Paciente;
 import clinica.repositorio.*;
-import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,15 +10,13 @@ public class PacienteMenuFrame extends JFrame {
     private final PacienteRepository pacienteRepo;
     private final MedicoRepository medicoRepo;
     private final ConsultaRepository consultaRepo;
-    private final AvaliacaoRepository avaliacaoRepo;
     
-    public PacienteMenuFrame(Paciente paciente, PacienteRepository pacienteRepo, MedicoRepository medicoRepo, ConsultaRepository consultaRepo, AvaliacaoRepository avaliacaoRepo) {
+    public PacienteMenuFrame(Paciente paciente, PacienteRepository pacienteRepo, MedicoRepository medicoRepo, ConsultaRepository consultaRepo) {
         super("Menu do Paciente");
         this.paciente = paciente;
         this.pacienteRepo = pacienteRepo;
         this.medicoRepo = medicoRepo;
         this.consultaRepo = consultaRepo;
-        this.avaliacaoRepo = avaliacaoRepo;
         
         initComponents();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -46,25 +42,17 @@ public class PacienteMenuFrame extends JFrame {
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
     JButton btnAgendar = new JButton("Agendar Consulta");
     btnAgendar.setBackground(Color.GREEN);
-    btnAgendar.addActionListener(e -> new AgendarConsultaFrame(paciente, pacienteRepo, medicoRepo).setVisible(true));
+    btnAgendar.addActionListener(e -> new AgendarConsultaFrame(paciente, medicoRepo, consultaRepo).setVisible(true));
 
     JButton btnCancelar = new JButton("Cancelar Agendamento");
     btnCancelar.setBackground(Color.RED);
     btnCancelar.setForeground(Color.WHITE);
-    btnCancelar.addActionListener(e -> new CancelarAgendamentoFrame(paciente, pacienteRepo, medicoRepo).setVisible(true));
+    btnCancelar.addActionListener(e -> new CancelarAgendamentoFrame(paciente, consultaRepo).setVisible(true));
 
     JButton btnAlterar = new JButton("Alterar Dados");
     btnAlterar.setBackground(Color.BLUE);
     btnAlterar.setForeground(Color.WHITE);
     btnAlterar.addActionListener(e -> new AlterarDadosFrame(paciente, pacienteRepo).setVisible(true));
-
-    // Novo botão Avaliar Consulta
-    JButton btnAvaliar = new JButton("Avaliar Consulta");
-    btnAvaliar.setBackground(new Color(128, 0, 128)); // Roxo
-    btnAvaliar.setForeground(Color.WHITE);
-    btnAvaliar.addActionListener(e -> new AvaliarConsultaFrame(paciente, consultaRepo).setVisible(true));
-
-
 
     // Novo botão Pagar
     JButton btnPagar = new JButton("Pagar");
@@ -84,7 +72,6 @@ public class PacienteMenuFrame extends JFrame {
     buttonPanel.add(btnAgendar);
     buttonPanel.add(btnCancelar);
     buttonPanel.add(btnAlterar);
-    buttonPanel.add(btnAvaliar);
     buttonPanel.add(btnPagar);
     buttonPanel.add(btnLogout);
 
@@ -95,18 +82,8 @@ public class PacienteMenuFrame extends JFrame {
     add(northPanel, BorderLayout.NORTH);
 
     // Espaço central
-    add(new EstatisticasPanel(medicoRepo, consultaRepo), BorderLayout.CENTER);
+    add(new EstatisticasPanel(consultaRepo), BorderLayout.CENTER);
 
-
-    // Exibir notificações
-    NotificacaoRepository notifRepo = new NotificacaoRepository();
-    List<Notificacao> notificacoes = notifRepo.buscarPorPaciente(paciente.getId());
-
-    for (Notificacao n : notificacoes) {
-        JOptionPane.showMessageDialog(this, n.getMensagem());
-    }
-
-    notifRepo.limparPorPaciente(paciente.getId());
     } 
 
     

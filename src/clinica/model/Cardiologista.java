@@ -1,14 +1,25 @@
 package clinica.model;
-import java.util.List;
-public class Cardiologista extends Medico{
+
+import java.time.LocalDate;
+
+public class Cardiologista extends Medico {
+
     private static final double ADICIONAL = 150;
 
-    public Cardiologista(String id, String nome, String senha, double valorConsultaParticular, List<String> planosAtendidos) {
-        super(id, nome, senha, "Cardiologista", valorConsultaParticular, planosAtendidos);
+    private boolean realizaEcocardiograma;
+
+    public Cardiologista(int id, String nome, String sobrenome, String email, String senha,
+                         LocalDate dataNascimento, char sexo, String crm,
+                         double valorDaConsulta, String telefoneProfissional,
+                         boolean realizaEcocardiograma) {
+        super(id, nome, sobrenome, email, senha, dataNascimento, sexo, crm,
+              valorDaConsulta, telefoneProfissional, "Cardiologista");
+        this.realizaEcocardiograma = realizaEcocardiograma;
     }
-    
+
     @Override
-    public double getValorConsulta() {
-        return super.getValorConsulta() + ADICIONAL;
-    }
+    public double getValorConsulta() { return super.getValorConsulta() + ADICIONAL; }
+
+    public boolean isRealizaEcocardiograma()              { return realizaEcocardiograma; }
+    public void setRealizaEcocardiograma(boolean v)       { this.realizaEcocardiograma = v; }
 }

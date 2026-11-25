@@ -129,8 +129,11 @@ public class AlterarDadosFrame extends JFrame {
                     pacienteRepo.atualizar(paciente);
                     JOptionPane.showMessageDialog(this,"Dados do paciente atualizados!");
                     dispose();
+                } catch (IllegalStateException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(),
+                            "Erro de integridade (banco)", JOptionPane.WARNING_MESSAGE);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this,"Erro: "+ex.getMessage());
+
                 }
             });
         }

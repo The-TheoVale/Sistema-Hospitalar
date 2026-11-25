@@ -21,6 +21,9 @@ public class EstatisticasService {
     }
 
     /** Nome do médico → quantidade de consultas, em ordem decrescente. */
+    public Map<String, Integer> medicosComMinimoDeConsultas(int minimo) {
+        return consultaRepositorio.medicosComMinimoDeConsultas(minimo);
+    }
     public Map<String, Integer> consultasPorMedico() {
         return consultaRepositorio.contarPorMedico();
     }

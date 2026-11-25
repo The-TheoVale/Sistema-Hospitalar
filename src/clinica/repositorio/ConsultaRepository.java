@@ -203,6 +203,28 @@ public class ConsultaRepository {
         return mapa;
     }
 
+    public Map<String, Integer> medicosComMinimoDeConsultas(int minimo) {
+        String sql = """
+                SELECT m.nome || COALESCE(' ' || m.sobrenome, '') AS medico, COUNT(*) AS total
+                  FROM consulta c
+                  JOIN medico m ON m.id_usuario = c.id_usuario_medico
+                 GROUP BY m.id_usuario, m.nome, m.sobrenome
+                HAVING COUNT(*) >= ?
+                 ORDER BY total DESC
+                """;
+        Map<String, Integer> mapa = new LinkedHashMap<>();
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, minimo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) mapa.put(rs.getString("medico"), rs.getInt("total"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro na consulta com HAVING: " + e.getMessage(), e);
+        }
+        return mapa;
+    }
+
     // -----------------------------------------------------------------------
     // Mapeamento
     // -----------------------------------------------------------------------

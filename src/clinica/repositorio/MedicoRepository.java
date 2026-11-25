@@ -197,6 +197,22 @@ public class MedicoRepository {
         return lista;
     }
 
+    public List<Medico> buscarPorTermo(String termo) {
+        List<Medico> lista = new ArrayList<>();
+        String sql = "SELECT * FROM medico " +
+                "WHERE (nome || ' ' || COALESCE(sobrenome,'')) ILIKE ? ORDER BY nome";
+        try (Connection con = Conexao.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + termo + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapearComEspecialidade(rs, con));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar médicos: " + e.getMessage(), e);
+        }
+        return lista;
+    }
+
     public List<Medico> buscarPorEspecialidade(String especialidade) {
         List<Medico> lista = new ArrayList<>();
         // Determina a tabela filha a usar para filtrar

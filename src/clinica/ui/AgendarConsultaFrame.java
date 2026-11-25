@@ -124,11 +124,9 @@ public class AgendarConsultaFrame extends JFrame {
     private void filtrarMedicos(String termo) {
         String t = termo.equals("Pesquisar") ? "" : termo.toLowerCase();
         try {
-            medicosExibidos = medicoRepo.listarTodos().stream()
-                    .filter(m -> t.isEmpty()
-                            || m.getNomeCompleto().toLowerCase().contains(t)
-                            || m.getEspecialidade().toLowerCase().contains(t))
-                    .toList();
+            medicosExibidos = medicosExibidos = t.isEmpty()
+                    ? medicoRepo.listarTodos()
+                    : medicoRepo.buscarPorTermo(t);
         } catch (RuntimeException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             medicosExibidos = new ArrayList<>();

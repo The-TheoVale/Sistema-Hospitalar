@@ -47,11 +47,31 @@ public class EstatisticasPanel extends JPanel {
             graficoCard.add(graficoPizza, BorderLayout.CENTER);
 
             centerPanel.add(graficoCard);
+            JButton btnHaving = new JButton("Médicos com N ou mais consultas");
+            btnHaving.addActionListener(e -> mostrarHaving());
+            centerPanel.add(btnHaving);
         } catch (RuntimeException e) {
             centerPanel.add(criarCard("Erro ao carregar estatísticas", e.getMessage(), new Color(255, 182, 193)));
         }
 
         add(centerPanel, BorderLayout.CENTER);
+    }
+
+    private void mostrarHaving() {
+        String txt = JOptionPane.showInputDialog(this, "Mínimo de consultas:", "2");
+        if (txt == null) return;
+        try {
+            int minimo = Integer.parseInt(txt.trim());
+            StringBuilder sb = new StringBuilder();
+            estatisticasService.medicosComMinimoDeConsultas(minimo)
+                    .forEach((m, t) -> sb.append(m).append(" — ").append(t).append(" consultas\n"));
+            JOptionPane.showMessageDialog(this,
+                    sb.length() == 0 ? "Nenhum médico encontrado." : sb.toString());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Digite um número inteiro.");
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
+        }
     }
 
     private JPanel criarCard(String titulo, String valor, Color corFundo) {

@@ -1,113 +1,171 @@
 # 🏥 Sistema Hospitalar / Gestão de Clínica Médica
 
-> 🎓 **Projeto desenvolvido para a disciplina de Programação Orientada a Objetos (POO).**  
-> 👥 **Autores:**  
-> - [Theodorico Vale](https://github.com/The-TheoVale)  
-> - [Miguel Maia](https://github.com/MiguelmxDev)  
+> 🎓 **Projeto desenvolvido para a disciplina de Banco de Dados.**
+> 👥 **Autores:**
+> - [Theodorico Vale](https://github.com/The-TheoVale)
+> - Arthur dos Santos Sales
 
 ---
 
 ## 📌 Sobre o Projeto
 
-O **Sistema Hospitalar** é uma aplicação desktop desenvolvida em **Java** com interface gráfica **Java Swing**. O sistema permite o gerenciamento completo de consultas médicas, prontuários, lista de espera automática, faturamento e avaliações de médicos em uma clínica médica.
+O **Sistema Hospitalar** é uma aplicação desktop em **Java** com interface gráfica **Java Swing**, usada para gerenciar consultas médicas, pagamentos, receitas e estatísticas de uma clínica.
 
-A aplicação conta com autenticação segregada para **Pacientes** e **Médicos**, oferecendo jornadas personalizadas para cada perfil de usuário com persistência local de dados em arquivos CSV.
+A aplicação tem autenticação separada para **Pacientes** e **Médicos**, com um fluxo próprio para cada perfil. Os dados ficam em um banco **PostgreSQL remoto (Neon)**, acessado por **JDBC**.
 
----
-
-## 🛠️ Tecnologias e Conceitos de POO
-
-### Tecnologias
-- **Linguagem:** Java (JDK 17+)
-- **Interface Gráfica (GUI):** Java Swing / AWT
-- **Persistência de Dados:** Arquivos CSV (`dados/`)
-- **IDE Compatível:** VS Code, IntelliJ IDEA, Eclipse
-
-### Conceitos de Programação Orientada a Objetos Aplicados
-
-- **Abstração & Herança:**  
-  - Classe abstrata `Usuario`, base para `Paciente` e `Medico`.
-  - Classe abstrata `Medico`, especializada em classes de especialidades médicas (`Cardiologista`, `ClinicoGeral`, `Pediatra`).
-- **Polimorfismo:**  
-  - Sobrescrita do método `getValorConsulta()` nas subclasses de `Medico` para adição de taxas específicas de especialidade (ex.: valor adicional para consultas com cardiologista).
-- **Encapsulamento:**  
-  - Controle rígido de acesso a atributos via modificadores `private`/`protected` e exposição por getters e setters adequados.
-- **Tratamento de Exceções Customizadas:**  
-  - Exceções de domínio bem especificadas para consistência de fluxo, como `LoginInvalidoException`, `UsuarioDuplicadoException`, `ConsultaInexistenteException`, `AvaliacaoInvalidaException` e `EspecialidadeInvalidaException`.
-- **Arquitetura MVC / Camadas:**  
-  - **`model`**: Classes de domínio e entidades do sistema.
-  - **`repositorio`**: Camada de persistência e manipulação de arquivos CSV.
-  - **`service`**: Regras de negócio, validações e orquestração.
-  - **`ui`**: Componentes de interface gráfica Swing.
-  - **`exception`**: Exceções de domínio da aplicação.
+> **Histórico:** a primeira versão, feita para POO, guardava os dados em arquivos CSV. Depois a persistência foi migrada para o PostgreSQL, seguindo o esquema relacional do trabalho. Avaliações, lista de espera e notificações existiam só na versão em CSV e foram removidas na migração.
 
 ---
 
-## ✨ Funcionalidades Principais
+## 🛠️ Tecnologias
+
+| Item | Tecnologia |
+| --- | --- |
+| Linguagem | Java (JDK 17+) |
+| Interface gráfica | Java Swing / AWT |
+| Banco de dados | PostgreSQL remoto hospedado na [Neon](https://neon.tech) (porta 5432, SSL obrigatório) |
+| Acesso ao banco | JDBC puro, sem ORM: driver `postgresql-42.7.14.jar` (pasta `lib/`) e `PreparedStatement` |
+| IDEs | IntelliJ IDEA (projeto configurado), VS Code ou Eclipse |
+
+---
+
+## 🧱 Arquitetura
+
+O código é organizado em camadas, dentro de `src/clinica/`:
+
+| Pacote | Responsabilidade |
+| --- | --- |
+| `config` | `Conexao`: lê o `.env` e abre a conexão JDBC com o PostgreSQL |
+| `model` | Entidades de domínio: `Usuario`, `Paciente`, `Medico` (e especialidades), `Consulta`, `Conta`, `Receita`, `Plano` |
+| `repositorio` | Acesso ao banco com SQL parametrizado: `PacienteRepository`, `MedicoRepository`, `ConsultaRepository`, `ContaRepository`, `ReceitaRepository`, `PlanoRepository`, `UtilizaRepository` |
+| `service` | Regras de negócio: `AuthService`, `AgendamentoService`, `ConsultaService`, `EstatisticasService` |
+| `ui` | Telas Swing (login, cadastro, menus, agendamento, pagamento, realização de consulta, estatísticas) |
+| `exception` | Exceções de domínio: `LoginInvalidoException`, `UsuarioDuplicadoException`, `ConsultaInexistenteException`, `EspecialidadeInvalidaException` |
+
+**Conceitos aplicados**
+
+- **Abstração e herança:** `Usuario` (abstrata) é a base de `Paciente` e `Medico`; `Medico` (abstrata) é especializada em `Cardiologista`, `ClinicoGeral`, `Pediatra` e `Cirurgiao`.
+- **Polimorfismo:** as subclasses de `Medico` sobrescrevem `getValorConsulta()` quando a especialidade tem adicional (por exemplo, `Cardiologista`).
+- **Encapsulamento:** atributos privados ou protegidos, com acesso por getters e setters.
+- **Tratamento de exceções:** exceções próprias para erros de domínio; erros de SQL são repassados como `RuntimeException` com mensagem clara e exibidos na interface.
+
+---
+
+## 🗄️ Banco de Dados
+
+O esquema segue o modelo relacional do TP3.
+
+| Tabela | Descrição |
+| --- | --- |
+| `paciente`, `medico` | Usuários do sistema (e-mail e CPF/CRM únicos) |
+| `cardiologista`, `pediatra`, `cirurgiao` | Especializações de `medico` (a especialidade Clínico Geral não tem tabela própria) |
+| `plano` | Planos de saúde |
+| `utiliza` | Relação médico × paciente × plano (plano nulo = atendimento particular) |
+| `consulta` | Consultas agendadas ou realizadas (um médico não atende dois pacientes no mesmo horário) |
+| `conta` | Cobrança de uma consulta (uma conta por consulta) |
+| `receita` | Prescrições ligadas a uma consulta |
+
+**Recursos de SQL usados pela aplicação**
+
+- `JOIN`, `GROUP BY` e `HAVING`: o painel de estatísticas lista os médicos com N ou mais consultas.
+- Busca de médicos por nome com `ILIKE`.
+- **Gatilho** `fn_validar_conta`: garante que a conta pertence ao paciente da consulta e define o vencimento padrão de 15 dias. Erros de integridade vindos do banco são mostrados ao usuário.
+- **View** `vw_resumo_consultas` e **índice** `idx_consulta_paciente_data`.
+
+Os scripts do TP3 (`01_create.sql`, `02_insert.sql`, `03_objects.sql` e `04_tests.sql`) criam o esquema, populam o banco, criam a view, o índice e o gatilho, e contêm os testes. Execute-os nessa ordem em um banco PostgreSQL vazio.
+
+---
+
+## ✨ Funcionalidades
 
 ### 👤 Perfil do Paciente
-- 🔐 **Autenticação & Cadastro:** Criação de conta com opção de informar plano de saúde.
-- 📅 **Agendamento de Consultas:** Busca de médicos por especialidade e seleção de datas disponíveis.
-- ⏳ **Lista de Espera Inteligente:** Inclusão automática na lista de espera caso o médico atinja o limite diário de consultas.
-- 🔔 **Notificações:** Alerta automático ao ser promovido da lista de espera após o cancelamento de uma consulta por outro paciente.
-- 💳 **Pagamento:** Liquidação de consultas particulares ou convênio médico.
-- ⭐️ **Avaliação de Atendimento:** Atribuição de notas (1 a 5 estrelas) e parecer sobre a consulta realizada.
-- ✏️ **Atualização de Perfil:** Alteração de dados cadastrais (nome e senha).
+- 🔐 **Cadastro e login**, com opção de informar o plano de saúde.
+- 📅 **Agendar consulta**, buscando o médico por nome e escolhendo a data em um calendário.
+- ❌ **Cancelar agendamento.**
+- 💳 **Pagar** a conta de uma consulta.
+- ✏️ **Alterar dados** cadastrais.
 
 ### 👨‍⚕️ Perfil do Médico
-- 🩺 **Painel da Agenda:** Visualização de consultas marcadas para o dia e histórico.
-- 📝 **Realização de Consulta:** Registro de prontuário, descrição do atendimento, prescrição de medicamentos (receita) e exames solicitados.
-- 📊 **Painel Estatístico:** Indicadores de desempenho, faturamento total, total de consultas realizadas/canceladas e média de avaliações recebidas.
-- 💬 **Visualização de Feedbacks:** Leitura das avaliações e comentários deixados pelos pacientes.
+- 🩺 **Realizar consulta:** registro do atendimento e emissão de receita.
+- 📊 **Painel de estatísticas:** especialidade mais procurada, total de consultas realizadas, gráfico de consultas por médico e consulta de médicos com N ou mais consultas.
+- ✏️ **Alterar dados** cadastrais.
 
 ---
 
 ## 📂 Estrutura do Projeto
 
 ```text
-Sistema Hospital/
+Sistema-Hospitalar/
 ├── src/
-│   ├── App.java                   # Ponto de entrada (método main)
+│   ├── App.java                   # Ponto de entrada (main)
 │   └── clinica/
-│       ├── exception/             # Exceções customizadas do sistema
-│       ├── model/                 # Modelos de domínio (Usuario, Medico, Paciente, Consulta, etc.)
-│       ├── repositorio/           # Leitura e gravação nos arquivos CSV
-│       ├── service/               # Serviços e lógica de negócio
-│       └── ui/                    # Telas e formulários Swing
-├── dados/                         # Banco de dados em arquivos CSV
-│   ├── avaliacoes.csv
-│   ├── consultas.csv
-│   ├── contas.csv
-│   ├── listaespera.csv
-│   ├── medicos.csv
-│   ├── notificacoes.csv
-│   └── pacientes.csv
-├── lib/                           # Bibliotecas e dependências externas (.jar)
-└── bin/                           # Arquivos Java compilados (.class)
+│       ├── config/                # Conexão com o PostgreSQL (Conexao)
+│       ├── exception/             # Exceções de domínio
+│       ├── model/                 # Entidades
+│       ├── repositorio/           # Acesso ao banco (JDBC)
+│       ├── service/               # Regras de negócio
+│       └── ui/                    # Telas Swing
+├── lib/
+│   └── postgresql-42.7.14.jar     # Driver JDBC do PostgreSQL
+├── dados/                         # CSVs da versão antiga (não são mais usados)
+├── .env                           # Credenciais do banco (NÃO versionado)
+└── README.md
 ```
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🚀 Como Executar
 
 ### Pré-requisitos
-- **Java Development Kit (JDK 17+)** instalado e configurado no PATH.
+- **JDK 17+** instalado e no PATH.
+- Um banco **PostgreSQL** com o esquema do TP3 carregado (por exemplo, um projeto gratuito na [Neon](https://neon.tech)).
 
-### Passos para Execução
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/The-TheoVale/Sistema-Hospitalar.git
+cd Sistema-Hospitalar
+```
 
-1. **Clonar o repositório:**
-   ```bash
-   git clone https://github.com/The-TheoVale/Sistema-Hospitalar.git
-   cd Sistema-Hospitalar
-   ```
+### 2. Configurar o banco
+Crie um arquivo `.env` na **raiz do projeto** (ele já está no `.gitignore` e nunca deve ser enviado ao GitHub):
 
-2. **Compilar o código fonte:**
-   ```bash
-   javac -d bin -sourcepath src src/App.java
-   ```
+```properties
+NEON_HOST=seu-host.neon.tech
+NEON_DATABASE=nome_do_banco
+NEON_USER=seu_usuario
+NEON_PASSWORD=sua_senha
+```
 
-3. **Executar a aplicação:**
-   ```bash
-   java -cp bin App
-   ```
+Depois, execute os scripts SQL do TP3 no banco, na ordem `01_create.sql`, `02_insert.sql`, `03_objects.sql`.
 
+### 3. Compilar
+Linux/macOS:
+```bash
+javac -cp lib/postgresql-42.7.14.jar -d bin -sourcepath src src/App.java
+```
+Windows (o separador do classpath é `;`):
+```bat
+javac -cp lib\postgresql-42.7.14.jar -d bin -sourcepath src src\App.java
+```
+
+### 4. Executar
+Execute **a partir da raiz do projeto**, porque o `.env` é lido do diretório atual.
+
+Linux/macOS:
+```bash
+java -cp "bin:lib/postgresql-42.7.14.jar" App
+```
+Windows:
+```bat
+java -cp "bin;lib\postgresql-42.7.14.jar" App
+```
+
+> No IntelliJ IDEA, basta abrir o projeto e rodar `App.java`. A biblioteca do driver já está configurada em `.idea/libraries`; confirme que o diretório de trabalho da execução é a raiz do projeto.
+
+---
+
+## ⚠️ Solução de problemas
+
+- **`Arquivo .env não encontrado`:** execute o programa a partir da raiz do projeto e confira o nome do arquivo.
+- **`Credenciais da Neon não configuradas corretamente`:** faltou alguma das quatro variáveis no `.env`.
+- **Erro de conexão ou SSL:** confira host, usuário e senha; a conexão exige `sslmode=require`.
